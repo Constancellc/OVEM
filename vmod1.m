@@ -2,6 +2,9 @@
 % created: 15 November 2011
 % author: Robert Camilleri
 %
+% modified: XX October 2016
+% by: Constance Crozier
+%
 % defining global Output Variables: global SPD
 %                                   global VP
 %                                   global PS
@@ -118,12 +121,16 @@ function vmod1_OpeningFcn(hObject, ~, handles, varargin)
 % varargin   command line arguments to vmod1 (see VARARGIN)
 %   
 global SPD
-if ((SPD(1)>1)&&(SPD(2)>1)&&(SPD(3)>1))
 set(handles.smmt,'value',SPD(1))
 set(handles.powertrain,'value',SPD(2))
 set(handles.drivecycle,'value',SPD(3))
-else 
-set(handles.smmt,'value',1);
+
+% surely unecessary
+%{
+if ((SPD(1)>1)&&(SPD(2)>1)&&(SPD(3)>1))
+else
+    s
+    set(handles.smmt,'value',1);
 set(handles.powertrain,'value',1);
 set(handles.drivecycle,'value',1);
 S = get(handles.smmt,'value');
@@ -131,7 +138,8 @@ P = get(handles.powertrain,'value');
 D = get(handles.drivecycle,'value');
 SPD=[S P D];
 
-end
+%}
+
 
 global SET
 global VP
@@ -175,7 +183,7 @@ set( mvm2, 'color', [ 0.9 0.9 .9 ] )
 
 function home_Callback(hObject, eventdata, handles)
 global OVEM31
-OVEM31==0;
+OVEM31=0;
 handles.output = hObject;
 guidata(hObject, handles);
 close();
@@ -187,16 +195,15 @@ ovemplus
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     
- function smmt_Callback(hObject, eventdata, handles);
+function smmt_Callback(hObject, eventdata, handles)
      global SPD
-     S=get(handles.smmt,'value');
-      P=get(handles.powertrain,'value');
-      D=get(handles.drivecycle,'value');
-     SPD=[S P D];
+     SPD(1)=get(handles.smmt,'value');
+     
 handles.output = hObject;
 guidata(hObject, handles);
 
- function smmt_CreateFcn(hObject, ~, ~);
+
+ function smmt_CreateFcn(hObject, ~, ~)
  %Hint: popupmenu controls usually have a white background on Windows.
  %      See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -205,24 +212,11 @@ end
 
 
 function powertrain_Callback(hObject, eventdata, handles)
-global SPD
-    S = get(handles.smmt,'value');
-if S ==1 ;      
-    mvm3=msgbox('please select a value from SMMT Categories');
-    set( mvm3, 'color', [ 0.9 0.9 .9 ] );
-else
-end
+    global SPD
+    SPD(2) = get(handles.powertrain,'value');
 
-    P = get(handles.powertrain,'value');
-    if P==1;
-        mvm4=msgbox('please select a value from Power Train');
-        set( mvm4, 'color', [ 0.9 0.9 .9 ] );
-    else
-    end
-    D=get(handles.drivecycle,'value');
-    SPD=[S P D];
-    handles.output = hObject;
-    guidata(hObject, handles);
+handles.output = hObject;
+guidata(hObject, handles);
     
 function powertrain_CreateFcn(hObject, eventdata, handles)
 
@@ -235,29 +229,20 @@ end
     
  
 function setvmod_Callback(hObject, eventdata, handles);
-
+% Checks that the SMMT and powertrain have been set then call the relevant
+% subgui
 global SPD
 if((SPD(1)==1)||(SPD(2)==1))
-mvm5=msgbox('please fill in the SMMT Categories and the Power Train');
-       set( mvm5, 'color', [ 0.9 0.9 .9 ] )
-elseif ((SPD(1)>1)&&(SPD(2)==2))%((SC>1)&&(P==2))
-   % global VP
-    %if (VP(1)>0)
+    mvm5=msgbox('please fill in the SMMT Categories and the Power Train');
+    set( mvm5, 'color', [ 0.9 0.9 .9 ] );
+elseif SPD(2)==2
       ice(); %call the sub gui
-   % else
-     %   VP=[0 0 0 0 0 0]
-      %  ice();
-    %end
-elseif  ((SPD(1)>1)&&(SPD(2)==3))
+elseif SPD(2)==3
       hybrid();
-elseif  ((SPD(1)>1)&&(SPD(2)==4))
+elseif SPD(2)==4
       electric();
 end
-   
-   
-  
-   
-   
+
 
 function drivecycle_Callback(hObject, eventdata, handles)
 handles.output = hObject;
@@ -274,7 +259,7 @@ end
 
 function govmod_Callback(hObject, eventdata, handles)
 global SPD
-global VP %VP=[0 0 0 0 0 0]
+global VP 
 global PS
 global EP
 global MP
@@ -284,6 +269,7 @@ global SET
 global OVEM31
 global OUT
 
+% Is this necessary?
 S = get(handles.smmt,'value');
 P = get(handles.powertrain,'value');
 D = get(handles.drivecycle,'value');
@@ -299,18 +285,17 @@ drivecycle = {'NEDC' 'Artemis' 'FUDS' 'NYCC' 'US06' 'US HWFET' 'US EPA'};
 
 sp=SET(1);
 
-if (((S==1) || (P==1) || (D==1)) && (sp==0));
-    mcat=msgbox('please set values for SMMT Categories, Power Train and Drivecycle','Choose Categories');
+if (((SPD(1)==1) || (SPD(2)==1) || (SPD(3)==1)) || (SET(1)==0))
+    mcat=msgbox('please set all parameters first');
        set( mcat, 'color', [ 0.9 0.9 .9 ] );
-elseif ((S>1) && (P>1) && (D>1) && (sp==0));
-    mset=msgbox('please set the vehicle parameters','Set Parameters');
-       set( mset, 'color', [ 0.9 0.9 .9 ] );
-elseif ((S>1) && (P>1) && (D>1) && (sp==1));
+else
     h = waitbar(0,'Calculating. Please wait...');
     steps = 100;
+    
     ovem31();
+    
     for step = 1:steps
-    waitbar(step / steps);
+        waitbar(step / steps);
     end
     close(h);
 

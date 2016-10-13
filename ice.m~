@@ -68,64 +68,37 @@ set(handles.fuel_type,'SelectionChangeFcn',@fuel_type_SelectionChangeFcn)
 set(handles.gearboxtype,'SelectionChangeFcn',@gearboxtype_SelectionChangeFcn)
 
 global VP
-% If vehicle parameters have been set already add them to the structure
-if (VP(1)>0)
-    % Why strings??
-    set(handles.drag,'string',VP(1));
-    set(handles.frontalarea, 'string',VP(2));
-    set(handles.weight, 'string',VP(3));
-    set(handles.wheeldrive, 'string',VP(4));
-    set(handles.tyrediam, 'string',VP(5));
-    set(handles.tyreroll, 'string',VP(6));    
-% Otherwise store zeros. This is stupid, they already contain zeros
-else 
-    set(handles.drag, 'string','0');
-    set(handles.frontalarea, 'string','0');
-    set(handles.weight, 'string','0');
-    set(handles.wheeldrive, 'string','0');
-    set(handles.tyrediam, 'string','0');
-    set(handles.tyreroll, 'string','0');
-end
+set(handles.drag,'string',VP(1));
+set(handles.frontalarea, 'string',VP(2));
+set(handles.weight, 'string',VP(3));
+set(handles.wheeldrive, 'string',VP(4));
+set(handles.tyrediam, 'string',VP(5));
+set(handles.tyreroll, 'string',VP(6));    
+
 
 global PS
 
-% Same stupid shit
 global EP
-if (EP(1)>0)
 set(handles.enginesize, 'string', EP(1));
 set(handles.etorque,'string', EP(2));
 set(handles.epower,'string', EP(3));
-else 
-set(handles.enginesize, 'string', '0');
-set(handles.etorque,'string','0');
-set(handles.epower,'string','0');
-end
 
-%... And again
 global T
-if(T(2)>0)
-    set(handles.gbspd, 'string', T(2));
+set(handles.gbspd, 'string', T(2));
 set(handles.tgratio, 'string', T(3));
 set(handles.fgratio, 'string', T(4));
 set(handles.gbeffy, 'string', T(5));
 set(handles.axleffy, 'string', T(6));
-else
-    set(handles.gbspd, 'string', '0');
-set(handles.tgratio, 'string', '0');
-set(handles.fgratio, 'string', '0');
-set(handles.gbeffy, 'string', '0');
-set(handles.axleffy, 'string', '0');
-end
 
-% Dear god
 global VR
-if (VR(1)>0)
-    set(handles.range,'string',VR(1));
-else
-    set(handles.range,'string','0');
-end
+set(handles.range,'string',VR(1));
+
 
 global MP
+
+% This is for the lower and higher accepted parameter limits
+lower = [0,0,0,14,0];
+higher = [0.4,3,inf,17,0.02];
 
 guidata(hObject, handles);
 
@@ -205,24 +178,12 @@ Crr= [0.0085 0.0099 0.0106 .0096 .0096 .0096 .0096 .0096 .0096];
 
 checkboxStatus = get(handles.vehicledefault,'Value');
 if(checkboxStatus)
-    %if box is checked, 
-set(handles.drag,'string',Cd(SCC));
-set(handles.frontalarea,'string',Af(SCC));
-set(handles.weight,'string',glider_mass(SCC));
-set(handles.wheeldrive,'string',wheel_drive(SCC));
-set(handles.tyrediam,'string',tyre_dia_in(SCC));
-set(handles.tyreroll,'string',Crr(SCC));
-
-else
-    %if box is unchecked, text is set to 0
-    % ^Pretty sure you've already done that mate
-set(handles.drag, 'string','0');
-set(handles.frontalarea, 'string','0');
-set(handles.weight, 'string','0');
-set(handles.wheeldrive, 'string','0');
-set(handles.tyrediam, 'string','0');
-set(handles.tyreroll, 'string','0');
-
+    set(handles.drag,'string',Cd(SCC));
+    set(handles.frontalarea,'string',Af(SCC));
+    set(handles.weight,'string',glider_mass(SCC));
+    set(handles.wheeldrive,'string',wheel_drive(SCC));
+    set(handles.tyrediam,'string',tyre_dia_in(SCC));
+    set(handles.tyreroll,'string',Crr(SCC));
 end
 guidata(hObject, handles);
 
@@ -244,8 +205,26 @@ madv=msgbox('Sorry, the advanced feature is still inactive','advanced');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %vehicle values
 
+
+
+
+function generic(result,index)
+n = get(result,'String');             % get the string 
+n = str2num(n);                       % convert from string to number 
+
+% If no value input, or a value not between 0 and 0.4, complain
+if (isempty(n) || n < lower(index) || n > higher(index))  
+    set(result,'String','0');
+    txt = sprintf('Please choose a value between %d and %d'...
+        ,lower(index),higher(index));
+    m=msgbox('Please set the coefficient to a value between 'num2str(0) ' and ' num2str(0.4),'Drag Coefficient');
+    set( m, 'color', [ 0.9 0.9 .9 ] );
+end
+
 % Drag Coefficient 
 function drag_Callback(hObject, eventdata, handles)
+generic(handles.drag,1)
+%{
 dc = get(handles.drag,'String');        % get the string 
 dc = str2num(dc);                       % convert from string to number 
 
@@ -255,6 +234,8 @@ if (isempty(dc) || dc < 0 || dc > 0.4)
     mdc=msgbox('Please set the drag coefficient to a value between 0 and 0.4','Drag Coefficient');
     set( mdc, 'color', [ 0.9 0.9 .9 ] );
 end
+
+%}
 guidata(hObject, handles);
 
 function drag_CreateFcn(hObject, eventdata, handles)
@@ -611,7 +592,6 @@ elseif(ttype==0) %if CVT is chosen and default is automatic
         set(handles.axleffy, 'string', '100');
 end
           
-
 
 function gbreset_Callback(hObject, eventdata, handles)
 set(handles.gbspd, 'string', '0');

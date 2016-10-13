@@ -1,5 +1,6 @@
-function [pp,fc,per,fnc,ce,ra,fc_wtw,ce_wtw,med_batt_cap,mj_km] = ovem31%(batt_cost_kwh,fuel_cost_petrol,fuel_cost_diesel,fuel_cost_kwh)%,di_map,si_turbo_map,si_map)
- 
+function [pp,fc,per,fnc,ce,ra,fc_wtw,ce_wtw,med_batt_cap,mj_km] = ovem31
+
+% Where are these numbers from?
 batt_cost_kwh=1000;
 fuel_cost_petrol=1.076;
 fuel_cost_diesel=1.166;
@@ -49,11 +50,6 @@ global VR
 % rng=user desired range
 % reg=makes use of regeneration or not
 % ref=regeneration efficiency
-% % 
-%    di_map = xlsread('/Users/robert_camilleri/Desktop/OVEM+ 2/die_map.xls');
-%    si_turbo_map = xlsread('/Users/robert_camilleri/Desktop/OVEM+ 2/si_turbo_map.xls');
-%    si_map = xlsread('/Users/robert_camilleri/Desktop/OVEM+ 2/si_map.xls');
-%    ele_map = single(xlsread('/Users/robert_camilleri/Desktop/OVEM+ 2/ele_map'));
 
 di_map = single(xlsread('die_map.xls'));
 si_turbo_map = single(xlsread('si_turbo_map.xls'));
@@ -65,7 +61,6 @@ max_ele_eff = max(max(ele_map));
 
 [r,c,~] = find(max_ele_eff>95);
 max_ele_eff(r,c) = 95;
-
 
 %% Header
 
@@ -80,12 +75,14 @@ max_ele_eff(r,c) = 95;
 %% Load vehicle parameters
 
 %Load drive cycle information
-SDC=(SPD(3)-1);
-drive_cycle_selection=(SDC);%input('Enter the drive cycle selection: ');
+drive_cycle_selection=(SPD(3)-1);%input('Enter the drive cycle selection: ');
 number_of_drive_cycles=1;%input('Enter the number of drive cycles: ');
+
+% Calls drive cycle 3
 [v_req,t,slope,distance_req,distance_req_alt,timestep,~,drive_cycle_length]=...
    drive_cycle_3(drive_cycle_selection,number_of_drive_cycles);
 
+% WARNING: THESE ARE NOT CONSISTENT WITH THE SPD(2) NUMBERS
 %Powertrain types: 1 = EV; 2 = series HEV; 3 = parallel HEV; 4 = dual HEV;
 %5 = pure ICE
 
@@ -109,54 +106,59 @@ number_of_drive_cycles=1;%input('Enter the number of drive cycles: ');
 
 %% Vehicle inputs: mini, smini, l med, u med, exec, lux, sports, suv, mpv
 
-test_mass = 180;%driver
-glider_mass = VP(3);
-glider_mass = glider_mass + test_mass;
+test_mass = 180;                        % driver mass
+glider_mass = VP(3);                    % vehicle mass
+glider_mass = glider_mass + test_mass;  % total mass
 
-rho_air=1.2;%Density of air
-Crr = VP(6); 
-Cd = VP(1);
-Af = VP(2);
-tire_dia_in=VP(5);
+rho_air=1.2;                            % air density
+Crr = VP(6);                            % tyre rolling resistance
+Cd = VP(1);                             % drag coefficient
+Af = VP(2);                             % frontal area
+tire_dia_in=VP(5);                      % tyre diameter
 
 tire_radius = tire_dia_in.*2.54/100/2;
-top_gear_ratio = T(3);
+top_gear_ratio = T(3);                  
 final_drive_ratio = T(4);
 top_gear_number = T(2);
-peak_ice_T_2 = EP(2);
+peak_ice_T_2 = EP(2);                   % engine torque
 peak_ice_w_2 = 9000;
-max_P = EP(3);
+max_P = EP(3);                          % engine power
 
-w_at_peak_T1 = single([2800 4200 4250 2000 2100 1700 3450 2000 2300]);
+% WHAT IS w?? Watts?
+
+w_at_peak_T = single([2800 4200 4250 2000 2100 1700 3450 2000 2300]);
 
 %w=(max_P*1000)/peak_ice_T_2;
 %w_at_peak_T = (w*60)/(2*pi()); %convert w rad/s to rpm
-max_n_w = w_at_peak_T1(SPD(1)-1);
+
+% Ok, I have no idea what's going on
+max_n_w = w_at_peak_T(SPD(1)-1);
 min_n_w = max_n_w;
 min_w = 1000;
 
-number_of_driven_wheels = VP(4);
+number_of_driven_wheels = VP(4);        % ie. 2 or 4 wheel drive
 motor_in_or_out_of_wheel =0;
 elec_brake_state=0;
 gearbox_type= 1;
 
 
 % Actual performance
-SCC=(SPD(1)-1);
 CC = [8340 11995 17795 25920 25770 58440 23615 22880 21465];
-cap_cost = CC(SCC);
+cap_cost = CC(SPD(1)-1);
 
-FORWD = [1 1 1 0 0 0 1 0 1];
-front_or_rear_wheel_drive = FORWD(SCC);
+FORWD = [1 1 1 0 0 0 1 0 1];             % 1 --> front wheel drive
+front_or_rear_wheel_drive = FORWD(SPD(1)-1);
+
 dynamic_braking = 0;
 number_of_motors = 1;
+
 gear_ratio_vector = [1 1 1 1 1 1];
 simulate = [1 1 1 1 1 1 1 1 1];
 wheelbase =  2.38; 
 h=0.3;
 fuel_tank = [35 0 0 0 0 0 0 0 0];
 OIC = [23 23 23 27 27 27 27 27 27];
-old_ice_cost = max_P.*OIC(SCC)*.596; %Assume turbo pisi = turbo dici
+old_ice_cost = max_P.*OIC(SPD(1)-1)*.596; %Assume turbo pisi = turbo dici
 
 %% Unit conversion
 
@@ -169,7 +171,7 @@ peak_ice_w_2 = peak_ice_w_2*2*pi()/60;
 %kW to W
 max_P = max_P*1000;
 peak_ice_T = [98 125 185 400 360 500 280 350 280];
-w_at_peak_T = single([2800 4200 4250 2000 2100 1700 3450 2000 2300]);
+
 max_P1 = [49 70.5 104.4 145 99.9 149.9 154.7 110 92];
 
 %% Pre-allocate matrices
@@ -177,6 +179,7 @@ pt=SPD(2); %powertrain, 2=ice, %3=hyb, 4=ev
 ft=PS(3); %fueltype, 1=petrol, 0=diesel
 ht=PS(1); %hybrid type, 1=series, 2=dual, 3=plugin 
 eb=PS(2); %hybrid engine type, 1=ice, 0=fuelcell
+
 if pt==4;
    powertrain_type = 1;
             peak_ice_T_2 = peak_ice_T(SPD(1)-1);
@@ -213,10 +216,10 @@ end
 range_km = VR(1);
 
 %% Remove mass associated with engines and gearboxes
-ice_sp = .0018;%kg/W from FIAT worksheet
-overall_mass_fac = 1.036; %kg secondary mass per kg primary mass
+ice_sp = .0018;                                             %kg/W from FIAT worksheet
+overall_mass_fac = 1.036;                                   %kg secondary mass per kg primary mass
 gb_mass = 0.49.*peak_ice_T_2.^0.58.*top_gear_number.^0.29;  %Taken from P 52, Automotive transmissions: 
-   %fundamentals, selection, design and application; assuming cast iron gearbox
+                                                            %fundamentals, selection, design and application; assuming cast iron gearbox
 pri_mass = gb_mass + max_P.*ice_sp;
 glider_mass = glider_mass - pri_mass*(1+overall_mass_fac);
 

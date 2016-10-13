@@ -115,14 +115,13 @@ set( mo2, 'color', [ 0.9 0.9 .9 ] )
 
 % Vehicle Modelling
 function vmod_Callback(hObject, eventdata, handles)
-% If SPD has been set, open new GUI. If not, set all variables to 1 first
     global SPD
     if((SPD(1)>1)&&(SPD(2)>1)&&(SPD(3)>1))
-    vmod1
-else 
-SPD= [1 1 1];
+    else 
+        SPD= [1 1 1];
+    end
 vmod1
-end
+
 
 % Vehicle Sweep
 % Opens new GUI 'para1'

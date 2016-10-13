@@ -68,64 +68,42 @@ set(handles.fuel_type,'SelectionChangeFcn',@fuel_type_SelectionChangeFcn)
 set(handles.gearboxtype,'SelectionChangeFcn',@gearboxtype_SelectionChangeFcn)
 
 global VP
-% If vehicle parameters have been set already add them to the structure
-if (VP(1)>0)
-    % Why strings??
-    set(handles.drag,'string',VP(1));
-    set(handles.frontalarea, 'string',VP(2));
-    set(handles.weight, 'string',VP(3));
-    set(handles.wheeldrive, 'string',VP(4));
-    set(handles.tyrediam, 'string',VP(5));
-    set(handles.tyreroll, 'string',VP(6));    
-% Otherwise store zeros. This is stupid, they already contain zeros
-else 
-    set(handles.drag, 'string','0');
-    set(handles.frontalarea, 'string','0');
-    set(handles.weight, 'string','0');
-    set(handles.wheeldrive, 'string','0');
-    set(handles.tyrediam, 'string','0');
-    set(handles.tyreroll, 'string','0');
-end
+set(handles.drag,'string',VP(1));
+set(handles.frontalarea, 'string',VP(2));
+set(handles.weight, 'string',VP(3));
+set(handles.wheeldrive, 'string',VP(4));
+set(handles.tyrediam, 'string',VP(5));
+set(handles.tyreroll, 'string',VP(6));    
+
 
 global PS
 
-% Same stupid shit
 global EP
-if (EP(1)>0)
 set(handles.enginesize, 'string', EP(1));
 set(handles.etorque,'string', EP(2));
 set(handles.epower,'string', EP(3));
-else 
-set(handles.enginesize, 'string', '0');
-set(handles.etorque,'string','0');
-set(handles.epower,'string','0');
-end
 
-%... And again
 global T
-if(T(2)>0)
-    set(handles.gbspd, 'string', T(2));
+set(handles.gbspd, 'string', T(2));
 set(handles.tgratio, 'string', T(3));
 set(handles.fgratio, 'string', T(4));
 set(handles.gbeffy, 'string', T(5));
 set(handles.axleffy, 'string', T(6));
-else
-    set(handles.gbspd, 'string', '0');
-set(handles.tgratio, 'string', '0');
-set(handles.fgratio, 'string', '0');
-set(handles.gbeffy, 'string', '0');
-set(handles.axleffy, 'string', '0');
-end
 
-% Dear god
 global VR
-if (VR(1)>0)
-    set(handles.range,'string',VR(1));
-else
-    set(handles.range,'string','0');
-end
+set(handles.range,'string',VR(1));
+
 
 global MP
+
+
+
+% This is for the lower and higher accepted parameter limits
+global lower
+global higher
+
+lower = [0,0,0,14,0];
+higher = [0.4,3,inf,17,0.02];
 
 guidata(hObject, handles);
 
@@ -205,24 +183,12 @@ Crr= [0.0085 0.0099 0.0106 .0096 .0096 .0096 .0096 .0096 .0096];
 
 checkboxStatus = get(handles.vehicledefault,'Value');
 if(checkboxStatus)
-    %if box is checked, 
-set(handles.drag,'string',Cd(SCC));
-set(handles.frontalarea,'string',Af(SCC));
-set(handles.weight,'string',glider_mass(SCC));
-set(handles.wheeldrive,'string',wheel_drive(SCC));
-set(handles.tyrediam,'string',tyre_dia_in(SCC));
-set(handles.tyreroll,'string',Crr(SCC));
-
-else
-    %if box is unchecked, text is set to 0
-    % ^Pretty sure you've already done that mate
-set(handles.drag, 'string','0');
-set(handles.frontalarea, 'string','0');
-set(handles.weight, 'string','0');
-set(handles.wheeldrive, 'string','0');
-set(handles.tyrediam, 'string','0');
-set(handles.tyreroll, 'string','0');
-
+    set(handles.drag,'string',Cd(SCC));
+    set(handles.frontalarea,'string',Af(SCC));
+    set(handles.weight,'string',glider_mass(SCC));
+    set(handles.wheeldrive,'string',wheel_drive(SCC));
+    set(handles.tyrediam,'string',tyre_dia_in(SCC));
+    set(handles.tyreroll,'string',Crr(SCC));
 end
 guidata(hObject, handles);
 
@@ -244,18 +210,30 @@ madv=msgbox('Sorry, the advanced feature is still inactive','advanced');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %vehicle values
 
-% Drag Coefficient 
-function drag_Callback(hObject, eventdata, handles)
-dc = get(handles.drag,'String');        % get the string 
-dc = str2num(dc);                       % convert from string to number 
+
+
+% This is a generic function which checks that an input parameter is in a
+% valid range and then sets it.
+function generic(result,index)
+global higher
+global lower
+
+n = get(result,'String');             % get the string 
+n = str2num(n);                       % convert from string to number 
 
 % If no value input, or a value not between 0 and 0.4, complain
-if (isempty(dc) || dc < 0 || dc > 0.4)  
-    set(handles.drag,'String','0');
-    mdc=msgbox('Please set the drag coefficient to a value between 0 and 0.4','Drag Coefficient');
-    set( mdc, 'color', [ 0.9 0.9 .9 ] );
+if (isempty(n) || n < lower(index) || n > higher(index))  
+    set(result,'String','0');
+    txt = sprintf('Please choose a value between %d and %d'...
+        ,lower(index),higher(index));
+    m=msgbox(txt,'Drag Coefficient');
+    set( m, 'color', [ 0.9 0.9 .9 ] );
 end
-guidata(hObject, handles);
+
+% Drag Coefficient 
+function drag_Callback(hObject, eventdata, handles)
+generic(handles.drag,1)
+guidata(hObject, handles); % This appears to be missing from the others...
 
 function drag_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
@@ -266,15 +244,7 @@ end
 
 % Frontal Area
 function frontalarea_Callback(hObject, eventdata, handles)
-ifa = get(handles.frontalarea,'String');    % get the string
-ifa = str2num(ifa);                         % convert from string to number
-
-% Same deal
-if (isempty(ifa) || ifa < 0 || ifa > 3)  
-    set(handles.frontalarea,'String','0');
-    mifa=msgbox('please set the frontal area to a value between 0 and 3 ','frontal area');
-    set( mifa, 'color', [ 0.9 0.9 .9 ] );
-end
+generic(handles.frontalarea,2)
 
 function frontalarea_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
@@ -285,13 +255,7 @@ end
 
 % Weight
 function weight_Callback(hObject, eventdata, handles)
-w = get(handles.weight,'String');%get the string for the editText component
-w = str2num(w);%convert from string to number if possible, otherwise returns empty
-if (isempty(w) || w < 0)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.weight,'String','0');
-    mw=msgbox('Please set the kerb weight to a number greater than 0','Kerb Weight');
-    set(mw, 'color', [ 0.9 0.9 .9 ] );
-end
+generic(handles.weight,3)
 
 function weight_CreateFcn(hObject, eventdata, handles)
 
@@ -305,7 +269,7 @@ end
 function wheeldrive_Callback(hObject, eventdata, handles)
 wd = get(handles.wheeldrive,'String');%get the string for the editText component
 wd = str2num(wd);%convert from string to number if possible, otherwise returns empty
-if (isempty(wd) || wd<(2) ||wd>(4)||((2)<wd && wd<(4))); %  if user inputs something is not a number, or if the input is not 2 or 4
+if (isempty(wd) || ((wd~=2) && (wd~=4))) 
     set(handles.wheeldrive,'String','2');
     mwd=msgbox('Please set the wheel drive to 2 or 4','Wheel Drive');
     set(mwd,'color', [ 0.9 0.9 .9 ] );
@@ -313,7 +277,6 @@ else
 end
 
 function wheeldrive_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -322,16 +285,9 @@ end
 
 % Tyre Diameter
 function tyrediam_Callback(hObject, eventdata, handles)
-td = get(handles.tyrediam,'String');%get the string for the editText component
-td = str2num(td);%convert from string to number if possible, otherwise returns empty
-if (isempty(td) || td < 14 || td > 17)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.tyrediam,'String','0');
-    mtd=msgbox('please set the tyre diameter between 14" and 17"','tyre diameter');
-    set( mtd, 'color', [ 0.9 0.9 .9 ] );
-end
+generic(handles.tyrediam,4)
 
 function tyrediam_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -340,14 +296,7 @@ end
 
 
 function tyreroll_Callback(hObject, eventdata, handles)
-tr = get(handles.tyreroll,'String');%get the string for the editText component
-tr = str2num(tr);%convert from string to number if possible, otherwise returns empty
-if (isempty(tr) || tr < 0 || tr > 0.02)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.tyreroll,'String','0');
-    mtr=msgbox('please set the tyre rolling resistance between 0 and 0.02','tyre roll resistance');
-    set( mtr, 'color', [ 0.9 0.9 .9 ] );
-
-end
+generic(handles.tyreroll,5)
 
 function tyreroll_CreateFcn(hObject, eventdata, handles)
 
@@ -362,6 +311,7 @@ end
 
 %engine control buttons
 
+% This is the default option
 function enginedefault_Callback(hObject, eventdata, handles)
 global SPD;
 SCC=SPD(1)-1;
@@ -372,47 +322,45 @@ engine_power = [49 70.5 104.4 145 99.9 149.9 154.7 110 92];
 checkboxStatus = get(handles.enginedefault,'Value');
 
 if (checkboxStatus)
-set(handles.enginesize, 'string', default_esize(SCC));
-set(handles.etorque,'string',engine_torque(SCC));
-set(handles.epower,'string',engine_power(SCC));
-else   
-%set(handles.enginesize, 'string', '0');
-%set(handles.etorque,'string','0');
-%set(handles.epower,'string','0');
+    % Set the following based on SMMT specific standards
+    set(handles.enginesize, 'string', default_esize(SCC));
+    set(handles.etorque,'string',engine_torque(SCC));
+    set(handles.epower,'string',engine_power(SCC));
 
-
-e=get(handles.enginesize,'string');
-es=str2num(e);
-ft=get(handles.petrol,'value');
-if (ft==1)
-    if(es>0)
-    et=(99.129*es - 9.5001);
-    ep=(61.027*es - 12.571);
-    set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-
-    else
-        et=0;
-        ep=0;
+    e=get(handles.enginesize,'string');       % get the engine size
+    es=str2num(e);
+    ft=get(handles.petrol,'value');           % and fuel type
+    
+    % if petrol
+    if (ft==1)
+        if(es>0)
+        et=(99.129*es - 9.5001);
+        ep=(61.027*es - 12.571);
         set(handles.etorque,'string',et);
         set(handles.epower,'string',ep);
 
+        else
+            et=0;
+            ep=0;
+            set(handles.etorque,'string',et);
+            set(handles.epower,'string',ep);
+
+        end
+    elseif(ft==0)
+        if(es>0)
+        et=(152.78*es^1.0215);
+        ep=(81.128*es - 33.592);
+        set(handles.etorque,'string',et);
+        set(handles.epower,'string',ep);
+
+        else
+            et=0;
+            ep=0;
+        set(handles.etorque,'string',et);
+        set(handles.epower,'string',ep);
+
+        end    
     end
-elseif(ft==0)
-    if(es>0)
-    et=(152.78*es^1.0215);
-    ep=(81.128*es - 33.592);
-    set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-
-    else
-        et=0;
-        ep=0;
-    set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-
-    end    
-end
 end
 
 
