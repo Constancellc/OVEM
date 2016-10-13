@@ -1,0 +1,396 @@
+function [pp,fc,per,fnc,ce,ra,fc_wtw,ce_wtw,prob_tot,fleet_tot_mj,fleet_tot_co2,fleet_km_per_veh,...
+    tot_batt_kwh,cum_batt_cost,cumsum_dbl_batt,ovem_mat] = icert
+
+start_year = 2000;
+end_year = 2030;
+years = end_year-start_year;
+ev_subsidy_vec = zeros(years,1);
+elec_ren_vec = zeros(years,1);
+[his_dat,~,~,annual_km,g_per_km] = historical_data;
+
+%% Load fleet information
+gr = 0;
+tvs_growth_rate = 1.0185*(1+gr); %where gr is the user-defined TVS growth rate
+dynamic_scrap = 1;
+mixed_logit = 1;
+growth_damping = 1;
+
+%% Load engine maps
+
+% si_map = load('si_map');      
+% di_map = load('di_map');      
+% ele_map = load('ele_map');      
+% si_turbo_map = load('si_turbo_map');      
+
+di_map = single(xlsread('die_map'));
+si_turbo_map = single(xlsread('si_turbo_map'));
+si_map = single(xlsread('si_map'));
+ele_map = single(xlsread('ele_map'));
+
+max_di_eff = max(max(di_map));
+max_ele_eff = max(max(ele_map));
+
+[r,c,~] = find(max_ele_eff>92.5);
+max_ele_eff(r,c) = 92.5;
+
+%% Cumulative production triggers (learning curves)
+batt_cost_lr = 0.20; %
+batt_cost = 800*ones(years,1);
+tot_batt_kwh = zeros(years,1);
+dbl_batt = tot_batt_kwh;
+
+%% Load drive cycle information
+drive_cycle_selection=1;%input('Enter the drive cycle selection: ');
+number_of_drive_cycles=1;%input('Enter the number of drive cycles: ');
+[v_req,t,slope,distance_req,distance_req_alt,timestep,~,drive_cycle_length]=...
+   drive_cycle_3(drive_cycle_selection,number_of_drive_cycles);
+
+%% Load vehicle characteristics
+[motor_in_or_out_of_wheel,number_of_driven_wheels,tire_radius,...
+    Cd,Af,rho_air,glider_mass,Crr,elec_brake_state,gearbox_type,min_w,min_n_w,...
+    max_n_w,top_gear_number,top_gear_ratio,gear_ratio_vector,final_drive_ratio,...
+    simulate,peak_ice_T_2,peak_ice_w_2,w_at_peak_T,max_P,powertrain_type,...
+    number_of_motors,front_or_rear_wheel_drive,dynamic_braking,wheelbase,...
+    fuel_tank,h,range_km,overall_mass_fac,batt_V,old_ice_cost,cap_cost,mj_eff,...
+    ttw_ghg,range1,mj_die_km,fc_kw,e_motor_peak_T,motor_selection,ESS1_selection,...
+    ESS2_selection] = load_veh_para(v_req,t,timestep,drive_cycle_length,slope,...
+    distance_req,distance_req_alt,di_map,max_di_eff,max_ele_eff);
+
+ %% Technology investment
+invest_mat = zeros(years,6);
+invest_start_year = [2004 2005 2006 2007 2004 2000];
+invest_end_year = [2005 2010 2011 2012 2005 2005];
+invest = zeros(6,1);%[20 30 40 50 20 20]/100;
+
+invest_start_index = invest_start_year-start_year+1;
+invest_end_index = invest_start_index+invest_end_year-invest_start_year;
+
+for i=1:6
+    for j=invest_start_index(i):invest_end_index(i)
+        invest_mat(j,i) = invest(i);
+    end
+end
+
+%% EV subsidy 
+ev_subsidy_start_year = 2004;
+ev_subsidy_end_year = 2005;
+ev_subsidy = 5000;
+
+ev_start_index = ev_subsidy_start_year-start_year+1;
+ev_end_index = ev_start_index+ev_subsidy_end_year-ev_subsidy_start_year;
+
+ev_subsidy_vec(ev_start_index:ev_end_index) = ev_subsidy;
+
+%% User-defined percentage of electricity from non fossil-fuel sources
+elec_ren_start_year = 2004;
+elec_ren_end_year = 2005;
+per_elec_from_nuc_ren = 50;
+elec_co2_per_kwh = -579*per_elec_from_nuc_ren/100+609;%*ones(years,1);
+%elec_mj_per_kwh = 0.25*ones(years,1);
+
+elec_ren_start_index = elec_ren_start_year-start_year+1;
+elec_ren_end_index = elec_ren_start_index+elec_ren_end_year-elec_ren_start_year;
+
+elec_ren_vec(elec_ren_start_index:elec_ren_end_index) = elec_co2_per_kwh;
+
+%% Timing Triggers
+%[pet,die,ele] = fuel_prices(start_year,end_year);
+
+ fuel_cost_kwh = .09; %£/kWh:  Structural indicator for UK 2007 electricity 
+% %prices for households consuming 3500 kwh annually, of which 1300 kwh are 
+% %at night.  See Eurostat table nrg_pc_priceind
+% 
+ fuel_cost_petrol = 1.076; %Use 1,076 £/l operating cost for petrol in Apr 2008, based on 
+% %DfT Transport Statistics GB 2008, ss 3, Table 3,3 for petrol including
+% %taxes
+% 
+ fuel_cost_diesel = 1.166; %Use 1,166 £/l operating cost for diesel in Apr 2008, based on 
+% %DfT Transport Statistics GB 2008, ss 3, Table 3,3 for diesel including
+% %taxes
+% 
+ pet = fuel_cost_petrol*ones(years,1);
+ die = fuel_cost_diesel*ones(years,1);
+ ele = fuel_cost_kwh*ones(years,1);
+
+
+%% Pre allocation of vectors
+pp = zeros(years,6);
+fc_norm = pp;
+per = pp;
+fnc = pp;
+ce_norm = pp;
+ra = pp;
+fc_wtw_norm = pp;
+ce_wtw_norm = pp;
+fc = pp;
+ce = pp;
+fc_wtw = pp;
+ce_wtw = pp;
+prob_tot = pp;
+batt_cap = pp;
+mj_per_km = pp;
+
+
+%% User defined betas
+b_pp = 7;
+b_fc = 6;
+b_per = 5;b_fnc = 4;b_ce = 3;b_ra = 2;
+
+%% Run OVEM
+year_num = zeros(years,6);
+tic
+
+elec_co2_per_kwh1 = 496;
+elec_mj_per_kwh1 = 0.25*3.6;
+
+for i=1:years
+    
+%% Initialize time vector
+    if i==1;
+        year_num(1,1:6) = start_year;
+    else
+        year_num(i,1:6) = start_year-1+i;
+    end
+
+%% Find vehicle performance
+[pp(i,:),fc_norm(i,:),per(i,:),fnc(i,:),ce_norm(i,:),ra(i,:),fc_wtw_norm(i,:),...
+    ce_wtw_norm(i,:),batt_cap(i,:),mj_per_km(i,:)] = ovem3(batt_cost(i),pet(i),...
+    die(i),ele(i),di_map,si_turbo_map,si_map,ele_map,v_req,t,slope,distance_req,...
+    distance_req_alt,timestep,drive_cycle_length,elec_co2_per_kwh1,elec_mj_per_kwh1,...
+    motor_in_or_out_of_wheel,number_of_driven_wheels,tire_radius,...
+    Cd,Af,rho_air,glider_mass,Crr,elec_brake_state,gearbox_type,min_w,min_n_w,...
+    max_n_w,top_gear_number,top_gear_ratio,gear_ratio_vector,final_drive_ratio,...
+    simulate,peak_ice_T_2,peak_ice_w_2,w_at_peak_T,max_P,powertrain_type,...
+    number_of_motors,front_or_rear_wheel_drive,dynamic_braking,wheelbase,...
+    fuel_tank,h,range_km,overall_mass_fac,batt_V,old_ice_cost,cap_cost,mj_eff,...
+    ttw_ghg,range1,mj_die_km,fc_kw,e_motor_peak_T,motor_selection,ESS1_selection,...
+    ESS2_selection);
+
+end
+
+ovem_mat = [pp fc_norm per fnc ce_norm ra fc_wtw_norm ce_wtw_norm batt_cap mj_per_km];
+
+%% Apply EV subsidy
+% pp(:,5) = pp(:,5)-ev_subsidy_vec;
+% 
+% %% Change carbon emissions from renewables fraction
+% 
+% ce_norm(:,5) = ce_norm(:,5) .* elec_ren_vec./elec_co2_per_kwh1;
+% ce_wtw_norm(:,5) = ce_wtw_norm(:,5) .* elec_ren_vec./elec_co2_per_kwh1;
+
+for i=1:years
+%% Normalize to petrol;
+pp(i,:) = pp(i,:)/pp(i,1);
+fc(i,:) = fc_norm(i,:)/fc_norm(i,1);
+per(i,:) = per(i,:)/per(i,1);
+fnc(i,:) = fnc(i,:)/fnc(i,1);
+ce(i,:) = ce_norm(i,:)/ce_norm(i,1);
+ra(i,:) = ra(i,:)/ra(i,1);
+fc_wtw(i,:) = fc_wtw_norm(i,:)/fc_wtw_norm(i,1);
+ce_wtw(i,:) = ce_wtw_norm(i,:)/ce_wtw_norm(i,1);
+
+%% Determine consumer preference probabilities at each time step
+
+prob_tot(i,:) = cons_pref2(pp(i,:),fc(i,:),per(i,:),fnc(i,:),ce(i,:),ra(i,:),...
+    mixed_logit,b_pp,b_fc,b_per,b_fnc,b_ce,b_ra);
+
+%% Check for Q trigger conditions
+
+tot_batt_kwh(i) = batt_cap(i,:)*prob_tot(i,:)';
+
+if sum(tot_batt_kwh)>tot_batt_kwh(1)*2^sum(dbl_batt);
+    %Doubling of Q
+    dbl_batt(i) = 1;
+    batt_cost(i:end) = batt_cost(i)* (1-batt_cost_lr)^(sum(dbl_batt)); %Replace remainder of batt-cost vector with new batt_cost;
+else batt_cost(i:end) = batt_cost(i);
+    dbl_batt(i) = 0;
+end
+
+end
+toc
+
+%% Plot vehicle stock growth to end of simulation horizon
+[abs_veh_stock,out] = diff_curve2(tvs_growth_rate,prob_tot,years,dynamic_scrap,...
+    growth_damping,invest_mat);
+
+%% Find km per vehicle
+
+km_coeff = polyfit(annual_km(:,1),annual_km(:,2)*10^9,1);
+km_line = polyval(km_coeff,year_num(:,1));
+%km_line = 15000*ones(length(year_num(:,1)),1);
+annual_km_per_veh = km_line./out(:,1);
+upper_km_per_vehicle = 45000;%2*annual_km_per_veh(5);
+
+for i=1:length(years)+1
+    if annual_km_per_veh(i)>upper_km_per_vehicle;
+        annual_km_per_veh(i)=upper_km_per_vehicle;
+    else
+    end
+end
+
+%%
+%total annaul km will be proportional to number of vehicles on the road per
+%technology type and inversely proportional to refuelling availability.
+his_dat(3,:);
+g_per_km(:,2);
+
+if dynamic_scrap == 1
+    new_tvs = out;
+    [net_tvs,scrap_tvs] = dyn_scrap2(new_tvs);
+    %[net_tvs,scrap_tvs,total_mj,total_co2] = dyn_scrap3(new_tvs,annual_km_per_veh,ra,mj_per_km,ce_norm);
+    total_scrap = sum(scrap_tvs,2);
+    out = [sum(net_tvs,2) net_tvs];%net_tvs
+
+else
+%     total_mj = ene_his(out(:,2:end),annual_km_per_veh,ra,mj_per_km)/10^5;
+%     total_co2 = emm_his(out(:,2:end),annual_km_per_veh,ra,ce_norm);
+end
+    total_mj = ene_his(out(:,2:end),annual_km_per_veh,ra,mj_per_km)/10^5;
+    total_co2 = emm_his(out(:,2:end),annual_km_per_veh,ra,ce_norm);
+%% Add in emissions and energy use, cf current fleet.
+% - take scrappage rate, spread equally across the probability of set of technologies in a
+% given year
+
+% - calculate fleet emissions, energy use and cost/km transport.
+
+%% Outputs
+% Prob, TVS, emissions, energy
+
+fleet_tot_mj = total_mj/10^5;
+fleet_tot_co2 = total_co2/10^12;
+fleet_km_per_veh = total_co2./km_line;
+
+figure(4)
+subplot(2,2,1)
+plot(year_num(:,1),total_mj/10^5,'MarkerSize',8,'LineWidth',2)
+%hold on
+%plot(his_dat(1,:),his_dat(2,:)*41868*10^6/10^3,'r','MarkerSize',8,'LineWidth',2)
+xlabel('Year')
+ylabel('Total fuel energy used by fleet (GJ)')
+%legend('Projected','Actual')
+xlim([start_year end_year])
+hold off
+
+subplot(2,2,2)
+plot(year_num(:,1),total_co2/10^12,'MarkerSize',8,'LineWidth',2)
+%hold on
+%plot(his_dat(1,:),his_dat(3,:),'r','MarkerSize',8,'LineWidth',2)
+xlabel('Year')
+ylabel('Total CO2 emissions from fleet (Mt)')
+xlim([start_year end_year])
+%legend('Projected','Actual')
+hold off
+
+subplot(2,2,3)
+%plot(annual_km(:,1),annual_km(:,2)*10^9./(TVS_tot(:,2)*1000),'MarkerSize',8,'LineWidth',2)
+%hold on
+plot(year_num(:,1),km_line./out(:,1),'MarkerSize',8,'LineWidth',2)
+xlabel('Year')
+ylabel('Annual vehicle kilometres travelled (veh-km)')
+xlim([start_year end_year])
+%legend('Projected','Actual')
+hold off
+
+subplot(2,2,4)
+%plot(g_per_km(:,1),g_per_km(:,2),'MarkerSize',8,'LineWidth',2)
+%hold on
+plot(year_num(:,1),total_co2./km_line,'MarkerSize',8,'LineWidth',2)
+xlabel('Year')
+xlim([start_year end_year])
+ylabel('Average new car emissions (g CO2/km)')
+%legend('Projected','Actual')
+hold off
+
+tot_batt_kwh = cumsum(tot_batt_kwh);
+cum_batt_cost = batt_cost;
+cumsum_dbl_batt = cumsum(dbl_batt);
+
+figure(5)
+subplot(3,1,1)
+plot(year_num(:,1),cumsum(tot_batt_kwh),'MarkerSize',8,'LineWidth',2)
+xlabel('Time')
+ylabel('Cumulative battery demand (kWh)')
+
+subplot(3,1,2)
+plot(year_num(:,1),cumsum(dbl_batt),'MarkerSize',8,'LineWidth',2)
+xlabel('Time')
+ylabel('Binary variable representing the doubling of cumulative battery demand')
+
+subplot(3,1,3)
+plot(year_num(:,1),batt_cost,'MarkerSize',8,'LineWidth',2)
+xlabel('Time')
+ylabel('Battery cost (€/kWh)')
+
+
+figure(1)
+plot(year_num,prob_tot,'MarkerSize',8,'LineWidth',2)
+legend('Petrol','Diesel','Hybrid','Plugin Hybrid','Battery Electric','Fuel cell')
+xlabel('Time')
+ylabel('Probability')
+hold off
+
+time = [year_num year_num(:,1)];
+
+figure(6)
+bar(time(:,1:6),abs_veh_stock,'stacked')
+legend('Petrol','Diesel','Hybrid','Plugin Hybrid','Battery Electric','Fuel cell')
+xlabel('Time')
+ylabel('Number of new vehicles added to the total vehicle stock per year')
+
+figure(2)
+plot(time(:,1),out(:,1),'k--','MarkerSize',8,'LineWidth',2)
+hold on
+% plot(TVS_hist(:,1),cumsum(TVS_hist(:,2))*1000,'kx','MarkerSize',8,'LineWidth',2)
+% hold on
+plot(time(:,2:end),out(:,2:end),'MarkerSize',8,'LineWidth',2)
+legend('Total Vehicle Stock','Petrol','Diesel','Hybrid Petrol','Plugin Hybrid','Battery Electric','Fuel Cell')
+%title('Technology diffusion based on high investment into low carbon vehicles and evolving consumer choice due to increasing engine efficiency and lower carbon emissions')
+xlabel('Years')
+ylabel('Total number of vehicles per technology')
+hold off
+
+% figure(7)
+% plot(time(:,1),total_scrap,'k--','MarkerSize',8,'LineWidth',2)
+% hold on
+% % plot(TVS_hist(:,1),cumsum(TVS_hist(:,2))*1000,'kx','MarkerSize',8,'LineWidth',2)
+% % hold on
+% plot(time(:,1:6),scrap_tvs,'MarkerSize',8,'LineWidth',2)
+% legend('Total Scrapped Stock','Petrol','Diesel','Hybrid Petrol','Plugin Hybrid','Battery Electric','Fuel Cell')
+% %title('Technology diffusion based on high investment into low carbon vehicles and evolving consumer choice due to increasing engine efficiency and lower carbon emissions')
+% xlabel('Years')
+% ylabel('Total scrapped vehicles per technology')
+% hold off
+
+% figure(3)
+% barh([(fc_wtw_norm-fc_norm)' fc_norm'],'stacked')
+% % hold on
+% % barh(fc_norm,'r','stacked')
+% legend('WTT','TTW')
+% set(gca,'YTickLabel',{'Petrol','Diesel','HEV','PHEV','EV','FCEV'})
+% xlabel('MJ/100 km')
+% hold off
+
+% figure(4)
+% barh([(ce_wtw_norm-ce_norm)' ce_norm'],'stacked')
+% % hold on
+% % barh(fc_norm,'r','stacked')
+% legend('WTT','TTW')
+% set(gca,'YTickLabel',{'Petrol','Diesel','HEV','PHEV','EV','FCEV'})
+% xlabel('g CO2/km')
+% hold off
+
+% 
+% pp = [1.0000    1.0091    1.0874    1.6318    1.4586    3.1773];
+% fc =[1.0000    0.8873    0.6157    0.7418    0.2102    0.1650];
+% per =[1.0000    1.5000    1.5000    1.8000    1.5000    2.0000];
+% fnc =[1.0000    1.1100    1.7200    1.1300    0.2960    0.7150];
+% ce =[1.0000    0.9023    0.2575    0.2764         0         0];
+% ra =[1.0000    1.0000    1.0000    0.0100    0.0100    0.0050];
+% fc_wtw =[1.0000    0.8873    0.6157    0.7418    0.1891    0.1650];
+% ce_wtw =[1.0000    0.8996    0.3238    0.3626    0.3463    0.0306];
+% 
+% 
+% fc_norm =[220.7892  200.7772  175.8854  209.7556   57.5044   47.7542];
+% ce_norm =[149.9119  139.1694   50.1732   52.8896         0         0];
+% fc_wtw_norm =[306.8970  279.0803  244.4807  291.5603   71.8805   66.3783];
+% ce_wtw_norm =[184.1122  170.2698   77.4178   85.3808   79.2295    7.3971];

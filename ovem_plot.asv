@@ -1,0 +1,131 @@
+function varargout = ovem_plot(varargin)
+% PLOT MATLAB code for plot.fig
+%      PLOT, by itself, creates a novice PLOT or raises the existing
+%      singleton*.
+%
+%      H = PLOT returns the handle to a novice PLOT or the handle to
+%      the existing singleton*.
+%
+%      PLOT('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in PLOT.M with the given input arguments.
+%
+%      PLOT('Property','Value',...) creates a novice PLOT or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before plot_OpeningFcn gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to plot_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help plot
+
+% Last Modified by GUIDE v2.5 03-Jan-2012 15:42:50
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 0;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @plot_OpeningFcn, ...
+                   'gui_OutputFcn',  @plot_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before plot is made visible.
+function plot_OpeningFcn(hObject, ~, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to plot (see VARARGIN)
+
+global SPD; %SPD=[SMMT powertrain drivecycle]
+
+SCC=SPD(1)-1;
+smmtcategories = {'Mini' 'Super Mini' 'Lower Medium' 'Upper Medium' 'Executive' 'Luxury Saloon' 'Specialists Sports' 'Dual Purpose' 'MPV'};
+bestselling = {'Hyundai i10' 'Ford Fiesta' 'Ford Focus' 'BMW 3 Series' 'Mercedes-Benz C Class' 'Mercedes-Benz S Class' 'Volkswagen Scirocco' 'Honda CR-V' 'Vauxhall Zafira'};
+SPC=SPD(2)-1;
+powertrain = {'petrol' 'diesel' 'dual hybrid' 'plugin hybrid' 'electric' 'fuel cell'};
+SDC=SPD(3)-1;
+drivecycle = {'NEDC' 'Artemis' 'FUDS' 'NYCC' 'US06' 'US HWFET' 'US EPA'};
+
+global VCOMP  %23=sc,dp,cd; 32=sp,ds,cd; 22=not possible, 33=not possible
+
+if  ((VCOMP(1)==2) && (VCOMP(2)==3)) %same category, different powertrain
+    set(handles.smmt2,'string',smmtcategories{SCC}); %sets category
+    set(handles.best2,'string',bestselling{SCC}); %sets best in category
+    set(handles.pt2,'string','variable');
+    set(handles.text93,'string',drivecycle{SDC});  %constant drive cycle as previously selected
+elseif ((VCOMP(1)==3) && (VCOMP(2)==2))
+    set(handles.smmt2,'string','variable'); %sets category
+    set(handles.best1,'visible','off'); %switches off best in category
+    set(handles.best2,'visible','off'); %switches off best in category
+    set(handles.pt2,'string',powertrain{SPC}); %sets powertrain
+    set(handles.text93,'string',drivecycle{SDC}); %constant drive cycle as previously selected
+end
+
+
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = plot_OutputFcn(~, ~, handles) 
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+axes(handles.axes1); % this is used to set focus on the axes currently in use
+global PLOTX
+axes(handles.axes4);
+bar(PLOTX);
+
+y={'Energy Consumption [MJ/km]' 'Greenhouse Gas/km' 'Capital Cost'} ;
+global VCOMP
+if VCOMP(4)==2
+    ylabel(y{(VCOMP(4)-1)});
+elseif VCOMP(4)==3
+    ylabel(y{(VCOMP(4)-1)});
+    elseif VCOMP(4)==4
+    ylabel(y{(VCOMP(4)-1)});
+end
+
+xlabel('X data');
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%gui top buttons
+
+function close_Callback(hObject, eventdata, handles)
+%closes the old gui
+close();
+
+
+
+function saveplot_Callback(hObject, eventdata, handles)
+
+%allow the user to specify where to save the settings file
+[filename,pathname] = uiputfile('save_results','Save Results');
+
+if pathname == 0 %if the user pressed cancelled, then we exit this callback
+    return
+end
+
+%construct the path name of the save location
+saveDataName = fullfile(pathname,filename); 
+
+%saves the gui data
+hgsave(saveDataName);
