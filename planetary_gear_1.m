@@ -1,0 +1,75 @@
+function [pg_eff,T_b_pg1_out,w_b_pg1_out]=planetary_gear_1(powerplants_max_torque,...
+    T_b_wheelaxle_to_pg,w_b_wheelaxle_to_pg,pg_eff_profile,pg_eff_profile_index,...
+    ~,~)
+
+%Title: planetary_gear_backwards_1
+%
+%Author: Reed Doucette
+%
+%Created: March 8, 2010
+%
+%Purpose: To take the drive axle's required torque and speed, apply the
+%losses to them and then pass those requests to the ICE
+%
+%List of Inputs
+%   powerplants_max_torque      This is the maximum amount of torque the
+%                               motor and engine are capable of providing 
+%                               at the driveshaft, aka the sum of their
+%                               maximum torques accounting for any gear
+%                               ratios they go through
+%   T_b_wheelaxle_to_pg         The backwards torque request coming from
+%                               the backwards wheelaxle block
+%   w_b_wheelaxle_to_pg         The backwards speed request coming from the
+%                               backwards wheelaxle block
+%   pg_eff_profile              This is the planetary gear's efficiency
+%                               curve as a function of the driveshaft's
+%                               current torque as a ratio of the
+%                               driveshaft's maximum torque
+%   pg_eff_profile_index        This is the planetary gear's index for the
+%                               efficiency profile curve
+%   pg_to_ICE_GR                This is the gear ratio between the gears
+%                               connected to the driveshaft and to the ICE
+%   pg_to_motor_GR              This is the gear ratio between the gears
+%                               connected to the driveshaft and to the ICE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%Calculate the ratio of the current torque request to the maximum torque
+%capapble of being produced at the output of the PG
+
+percent_of_driveshafts_max_torque=single(abs(T_b_wheelaxle_to_pg)/powerplants_max_torque);
+
+%% Old method - Determine the efficiency of the planetary gear 
+%pg_eff=interp1(pg_eff_profile_index,pg_eff_profile,percent_of_driveshafts_max_torque,'linear','extrap');
+
+%% New method - approx1
+
+[~,min_pg_error_index] = min(abs(single(pg_eff_profile_index - percent_of_driveshafts_max_torque)));
+pg_eff = single(pg_eff_profile(min_pg_error_index));
+%%
+
+%%pg_eff = max([pg_eff 0]);
+%pg_eff = min([max(pg_eff_profile) max([single(pg_eff_profile(min_pg_error_index)) 0])]);
+
+   %% Efficiency check
+    if pg_eff<0
+        pg_eff=0;
+    elseif pg_eff>1
+        pg_eff=max(pg_eff_profile);
+    end
+    
+%pg_eff = min([max([pg_eff 0]) max(pg_eff_profile)]);
+    
+%For a positive torque request the request first goes to the ICE
+if T_b_wheelaxle_to_pg>=0 
+    %Apply the efficiency to the torque request being sent to the gb and then
+    %to the ICE and apply the pg to ICE gear ratio
+    T_b_pg1_out=single(T_b_wheelaxle_to_pg/pg_eff);
+
+    %Apply the efficiency to the speed request being sent to the gb and then to
+    %the ICE
+    w_b_pg1_out=w_b_wheelaxle_to_pg;
+elseif T_b_wheelaxle_to_pg<0
+    T_b_pg1_out=T_b_wheelaxle_to_pg/pg_eff;
+    w_b_pg1_out=w_b_wheelaxle_to_pg;
+end
