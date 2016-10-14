@@ -68,40 +68,41 @@ set(handles.regentype,'SelectionChangeFcn',@regentype_SelectionChangeFcn)
 
 
 global VP
-if (VP(1)>0)%exist('VP','var')
 set(handles.drag,'string',VP(1));
 set(handles.frontalarea, 'string',VP(2));
 set(handles.weight, 'string',VP(3));
 set(handles.wheeldrive, 'string',VP(4));
 set(handles.tyrediam, 'string',VP(5));
 set(handles.tyreroll, 'string',VP(6));    
-else 
-set(handles.drag, 'string','0');
-set(handles.frontalarea, 'string','0');
-set(handles.weight, 'string','0');
-set(handles.wheeldrive, 'string','0');
-set(handles.tyrediam, 'string','0');
-set(handles.tyreroll, 'string','0');
-end
 
 global VR
-if (VR(1)>0)
-    set(handles.range,'string',VR(1));
-else
-    set(handles.range,'string','0');
-end
-guidata(hObject, handles);
+set(handles.range,'string',VR(1));
 
 global MP
-if (MP(1)>0)
-    set(handles.mpower,'string',MP(1));
-    set(handles.mtorque,'string',MP(2));
-    set(handles.meffy,'string',MP(3));
-else
-    set(handles.mpower,'string','0');
-    set(handles.mtorque,'string','0');
-    set(handles.meffy,'string','0');
-    end
+set(handles.mpower,'string',MP(1));
+set(handles.mtorque,'string',MP(2));
+set(handles.meffy,'string',MP(3));
+
+% This is for the lower and higher accepted parameter limits for the
+% 'generic' function defined later
+global lower
+global higher
+
+%{
+INDEX
+-----
+1: drag coefficient
+2: frontal area
+3: kerb weight
+4: tyre diameter
+5: tyre roll resistance
+6: motor power
+7: range
+8: regen. efficiency
+%}
+lower = [0,0,0,14,0,0,0,0];
+higher = [0.4,3,Inf,17,0.02,1000,Inf,100];
+guidata(hObject, handles);
 
 
 
@@ -118,10 +119,9 @@ varargout{1} = handles.output;
 axes(handles.axes1); % this is used to set focus on the axes currently in use
 
 global SPD; % set car picture depending on which smmt category chosen in vmod1
-SCC=SPD(1)-1;
 picture = {'1.tiff' '2.tiff' '3.tiff' '4.tiff' '5.tiff' '6.tiff' '7.tiff' '8.tiff' '9.tiff'};
 axes(handles.axes3);
-imshow(picture{SCC});
+imshow(picture{SPD(1)-1});
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %top buttons
@@ -160,8 +160,12 @@ close(ev);
 
 
 function helpev_Callback(hObject, eventdata, handles)
-mevh=msgbox('EV Parameters allows you to set all the parameters that affect the performance of a vehicle.  Following your choice of SMMT category, you can now either set default values, taken from the 2009 best selling vehicle in that category or set your own','EV Parameters help')
-       set( mevh, 'color', [ 0.9 0.9 .9 ] )
+txt = ['EV Parameters allows you to set all the parameters that '...
+    'affect the performance of a vehicle.  Following your choice of '...
+    'SMMT category, you can now either set default values, taken from '...
+    'the 2009 best selling vehicle in that category or set your own'];
+mevh=msgbox(txt,'EV Parameters help');
+set( mevh, 'color', [ 0.9 0.9 .9 ] )
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -182,34 +186,24 @@ Crr= [0.0085 0.0099 0.0106 .0096 .0096 .0096 .0096 .0096 .0096];
 checkboxStatus = get(handles.defaultvehicle,'Value');
 if(checkboxStatus)
     %if box is checked, 
-set(handles.drag,'string',Cd(SCC));
-set(handles.frontalarea,'string',Af(SCC));
-set(handles.weight,'string',glider_mass(SCC));
-set(handles.wheeldrive,'string',wheel_drive(SCC));
-set(handles.tyrediam,'string',tyre_dia_in(SCC));
-set(handles.tyreroll,'string',Crr(SCC));
-
-else
-    %if box is unchecked, text is set to 0
-set(handles.drag, 'string','0');
-set(handles.frontalarea, 'string','0');
-set(handles.weight, 'string','0');
-set(handles.wheeldrive, 'string','0');
-set(handles.tyrediam, 'string','0');
-set(handles.tyreroll, 'string','0');
-
+    set(handles.drag,'string',Cd(SCC));
+    set(handles.frontalarea,'string',Af(SCC));
+    set(handles.weight,'string',glider_mass(SCC));
+    set(handles.wheeldrive,'string',wheel_drive(SCC));
+    set(handles.tyrediam,'string',tyre_dia_in(SCC));
+    set(handles.tyreroll,'string',Crr(SCC));
 end
 guidata(hObject, handles);
 
 
 
 function resetvehicle_Callback(hObject, eventdata, handles)
-set(handles.drag,'string','0');
-set(handles.frontalarea, 'string','0');
-set(handles.weight, 'string','0');
-set(handles.wheeldrive, 'string','0');
-set(handles.tyrediam, 'string','0');
-set(handles.tyreroll, 'string','0');
+    set(handles.drag,'string','0');
+    set(handles.frontalarea, 'string','0');
+    set(handles.weight, 'string','0');
+    set(handles.wheeldrive, 'string','0');
+    set(handles.tyrediam, 'string','0');
+    set(handles.tyreroll, 'string','0');
 guidata(hObject, handles);
 
 
@@ -220,18 +214,31 @@ madv=msgbox('Sorry, the advanced feature is still inactive','advanced');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %set vehicle parameters
 
-function drag_Callback(hObject, eventdata, handles)
-dc = get(handles.drag,'String');%get the string for the editText component
-dc = str2num(dc);%convert from string to number if possible, otherwise returns empty
-if (isempty(dc) || dc < 0 || dc > 0.4)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.drag,'String','0');
-    mdc=msgbox('please set the drag coefficient to a value between 0 and 0.4','drag coefficient');
-    set( mdc, 'color', [ 0.9 0.9 .9 ] );
+% This is a generic function which checks that an input parameter is in a
+% valid range and then sets it.
+function n = generic(result,index,name)
+% eg. generic(handles.drag,1,'Drag Coefficient')
+global higher
+global lower
+
+n = get(result,'String');             % get the string 
+n = str2double(n);                       % convert from string to number 
+
+% If no value input, or a value not between 0 and 0.4, complain
+if (isempty(n) || n < lower(index) || n > higher(index))  
+    set(result,'String','0');
+    txt = sprintf('Please choose a value between %d and %d'...
+        ,lower(index),higher(index));
+    m=msgbox(txt,name);
+    set( m, 'color', [ 0.9 0.9 .9 ] );
 end
+
+
+function drag_Callback(hObject, eventdata, handles)
+generic(handles.drag,1,'drag coefficient');
 guidata(hObject, handles);
 
 function drag_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -241,16 +248,9 @@ end
 
 
 function frontalarea_Callback(hObject, eventdata, handles)
-ifa = get(handles.frontalarea,'String');%get the string for the editText component
-ifa = str2num(ifa);%convert from string to number if possible, otherwise returns empty
-if (isempty(ifa) || ifa < 0 || ifa > 3)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.frontalarea,'String','0');
-    mifa=msgbox('please set the frontal area to a value between 0 and 3 ','frontal area');
-    set( mifa, 'color', [ 0.9 0.9 .9 ] );
-end
+generic(handles.frontalarea,2,'frontal area');
 
 function frontalarea_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -258,16 +258,9 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 function weight_Callback(hObject, eventdata, handles)
-w = get(handles.weight,'String');%get the string for the editText component
-w = str2num(w);%convert from string to number if possible, otherwise returns empty
-if (isempty(w) || w < 0)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.weight,'String','0');
-    mw=msgbox('please set the kerb weight to a number greater than 0','kerb weight');
-    set( mw, 'color', [ 0.9 0.9 .9 ] );
-end
+generic(handles.weight,3,'kerb weight');
 
 function weight_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -277,15 +270,15 @@ end
 
 function wheeldrive_Callback(hObject, eventdata, handles)
 wd = get(handles.wheeldrive,'String');%get the string for the editText component
-wd = str2num(wd);%convert from string to number if possible, otherwise returns empty
-if (isempty(wd) || wd ~= 2 || wd ~=4 )  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
+wd = str2double(wd);%convert from string to number if possible, otherwise returns empty
+if (isempty(wd) || ((wd~=2) && (wd~=4))) 
     set(handles.wheeldrive,'String','2');
-    mwd=msgbox('please set the wheel drive to 2 or 4','wheel drive');
-    set( mwd, 'color', [ 0.9 0.9 .9 ] );
+    mwd=msgbox('Please set the wheel drive to 2 or 4','Wheel Drive');
+    set(mwd,'color', [ 0.9 0.9 .9 ] );
+else
 end
 
 function wheeldrive_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -294,16 +287,9 @@ end
 
 
 function tyrediam_Callback(hObject, eventdata, handles)
-td = get(handles.tyrediam,'String');%get the string for the editText component
-td = str2num(td);%convert from string to number if possible, otherwise returns empty
-if (isempty(td) || td < 14 || td > 17)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.tyrediam,'String','0');
-    mtd=msgbox('please set the tyre diameter between 14" and 17"','tyre diameter');
-    set( mtd, 'color', [ 0.9 0.9 .9 ] );
-end
+generic(handles.tyrediam,4,'tyre diameter')
 
 function tyrediam_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -313,17 +299,9 @@ end
 
 
 function tyreroll_Callback(hObject, eventdata, handles)
-tr = get(handles.tyreroll,'String');%get the string for the editText component
-tr = str2num(tr);%convert from string to number if possible, otherwise returns empty
-if (isempty(tr) || tr < 0 || tr > 0.02)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.tyreroll,'String','0');
-    mtr=msgbox('please set the tyre rolling resistance between 0 and 0.02','tyre roll resistance');
-    set( mtr, 'color', [ 0.9 0.9 .9 ] );
-
-end
+generic(handles.tyreroll,5,'tyre roll resistance');
 
 function tyreroll_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -336,33 +314,15 @@ end
 
 
 function mpower_Callback(hObject, eventdata, handles)
-mp1 = get(handles.mpower,'String');%get the string for the editText component
-mp = str2num(mp1);
-if (isempty(mp) || mp < 0 || mp > 1000)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.mpower,'String','0');
-    mtr1=msgbox('please set the motor power between 0 and 1000','motor power');
-    set( mtr1, 'color', [ 0.9 0.9 .9 ] );
-else
-   set(handles.mtorque,'string',((mp*1000)/(471)));
-    set(handles.meffy,'string','95'); 
-end
-
-%mp1=get(handles.mpower,'string');
-%mp=str2num(mp1);
-
-
+generic(handles.mpower,6,'motor power');
 
 
 function mpower_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %motor controls
@@ -395,17 +355,9 @@ madv=msgbox('Sorry, the advanced feature is still inactive','advanced');
 %vehicle range
 
 function range_Callback(hObject, eventdata, handles)
-rng1 = get(handles.range,'String');%get the string for the editText component
-rng = str2num(rng1);%convert from string to number if possible, otherwise returns empty
-if (isempty(rng) || rng < 0)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.range,'String','0');
-    mrng=msgbox('please set the Range value greater that 0','Range');
-    set( mrng, 'color', [ 0.9 0.9 .9 ] )
-else 
-end
+generic(handles.range,7,'range');
 
 function range_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -415,7 +367,7 @@ end
 function rangedefault_Callback(hObject, eventdata, handles)
 rd=get(handles.rangedefault,'value');
 if(rd==1)
-set(handles.range,'string','100');
+    set(handles.range,'string','100');
 else
     set(handles.range,'string','0');
 end
@@ -423,7 +375,7 @@ end
 %regen control
 
 function regen_Callback(hObject, eventdata, handles)
-r=get(handles.regen,'Value')   % Get Value of selected object
+r=get(handles.regen,'Value');   % Get Value of selected object
 if r==1;
       set(handles.eregen,'Visible','on');
       set(handles.mregen, 'Visible', 'on');
@@ -503,17 +455,11 @@ function mregen_Callback(hObject, eventdata, handles)
 
 
 function regeneffy_Callback(hObject, eventdata, handles)
-re1=get(handles.regeneffy,'string');
-re=str2num(re1);
-if (isempty(re) || re<0 || re > 100)  
-    met=msgbox('the regenerative efficiency value should be between 0 and 100','regenerative efficiency');
-    set( met, 'color', [ 0.9 0.9 .9 ] );
-else
-end
+generic(handles.regeneffy,8,'regeneration efficiency');
+
 
     
 function regeneffy_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -532,41 +478,43 @@ global T
 global VR
 global SET
 
+dc=get(handles.drag, 'string');         % drag coefficient
+dc=str2double(dc);
+fa=get(handles.frontalarea, 'string');  % frontal area
+fa=str2double(fa);
+kw=get(handles.weight, 'string');       % kerb weight
+kw=str2double(kw);                      
+wd=get(handles.wheeldrive, 'string');   % no. driven wheels
+wd=str2double(wd);
+td=get(handles.tyrediam, 'string');     % tyre diameter
+td=str2double(td);
+tr=get(handles.tyreroll, 'string');     % tyre rolling resistance
+tr=str2double(tr);
 
-dc1=get(handles.drag, 'string');
-dc=str2num(dc1);
-fa1=get(handles.frontalarea, 'string');
-fa=str2num(fa1);
-kw1=get(handles.weight, 'string');
-kw=str2num(kw1);
-wd1=get(handles.wheeldrive, 'string');
-wd=str2num(wd1);
-td1=get(handles.tyrediam, 'string');
-td=str2num(td1);
-tr1=get(handles.tyreroll, 'string');
-tr=str2num(tr1);
-VP=[dc fa kw wd td tr]
+VP=[dc fa kw wd td tr];
 
-PS=[2 2 2 2]
+PS=[2 2 2 2];
 
-EP=[0 2 2]
+EP=[0 2 2];
 
-mp1=get(handles.mpower,'string');
-mp=str2num(mp1);
-mt1=get(handles.mtorque,'string');
-mt=str2num(mt1);
-me1=get(handles.meffy,'string');
-me=str2num(me1);
-MP=[mp mt me]
+mp=get(handles.mpower,'string');        % motor power
+mp=str2double(mp);
+mt=get(handles.mtorque,'string');       % motor torque
+mt=str2double(mt);
+me=get(handles.meffy,'string');         % motor efficiency
+me=str2double(me);
 
-T=[2 2 2 2 2 2] %gearbox for ev will be single ratio gear
+MP=[mp mt me];
 
-rng1=get(handles.range,'string');
-rng=str2num(rng1);
-reg=get(handles.regen,'value');
-ref1=get(handles.regeneffy,'string');
-ref=str2num(ref1);
-VR=[rng reg ref]
+T=[2 2 2 2 2 2]; 
+
+rng=get(handles.range,'string');        % range
+rng=str2double(rng);
+reg=get(handles.regen,'value');         % regen? (0/1) 
+ref=get(handles.regeneffy,'string');    % regen efficiency
+ref=str2double(ref);
+
+VR=[rng reg ref];
 
 if(VP(1)==0||VP(2)==0||VP(3)==0||VP(4)==0||VP(5)==0||VP(6)==0)
     mvperror=msgbox('Please note that none of the Vehicle Parameters could be set to 0','Error Set Parameters');

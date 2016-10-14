@@ -53,14 +53,13 @@ function ice_OpeningFcn(hObject, ~, handles, varargin)
 % varargin   command line arguments to ice (see VARARGIN)
 
 global SPD;
-SCC=SPD(1)-1;               % Index of selected SMMT
 smmtcategories = {'Mini' 'Super Mini' 'Lower Medium' 'Upper Medium' 'Executive' 'Luxury Saloon' 'Specialists Sports' 'Dual Purpose' 'MPV'};
 bestselling = {'Hyundai i10' 'Ford Fiesta' 'Ford Focus' 'BMW 3 Series' 'Mercedes-Benz C Class' 'Mercedes-Benz S Class' 'Volkswagen Scirocco' 'Honda CR-V' 'Vauxhall Zafira'};
 
 % Adds strings containing the chosen SMMT catergory and the best selling
 % model from that category to the structure
-set(handles.smmttext,'string',smmtcategories{SCC});
-set(handles.bestsellingtext,'string',bestselling{SCC});
+set(handles.smmttext,'string',smmtcategories{SPD(1)-1});
+set(handles.bestsellingtext,'string',bestselling{SPD(1)-1});
 
 guidata(hObject, handles);
 
@@ -74,7 +73,6 @@ set(handles.weight, 'string',VP(3));
 set(handles.wheeldrive, 'string',VP(4));
 set(handles.tyrediam, 'string',VP(5));
 set(handles.tyreroll, 'string',VP(6));    
-
 
 global PS
 
@@ -93,12 +91,31 @@ set(handles.axleffy, 'string', T(6));
 global VR
 set(handles.range,'string',VR(1));
 
-
 global MP
 
-% This is for the lower and higher accepted parameter limits
-lower = [0,0,0,14,0];
-higher = [0.4,3,inf,17,0.02];
+% This is for the lower and higher accepted parameter limits for the
+% 'generic' function defined later
+global lower
+global higher
+
+%{
+INDEX
+-----
+1: drag coefficient
+2: frontal area
+3: kerb weight
+4: tyre diameter
+5: tyre roll resistance
+6-11: engine size (SMMT specific) 
+12: gearbox speed
+13: top gear ratio
+14: final gear ratio
+15: gearbox efficiency
+16: axle efficiency
+17: range
+%}
+lower = [0,0,0,14,0,0,1,1.3,1.6,2,3.5,4,0,2,0,0,0];
+higher = [0.4,3,Inf,17,0.02,1.1,1.4,2,3,3.5,Inf,7,1,5,100,100,Inf];
 
 guidata(hObject, handles);
 
@@ -115,10 +132,9 @@ axes(handles.axes1); % this is used to set focus on the axes currently in use
 
 
 global SPD; % set car picture depending on which smmt category chosen in vmod1
-SCC=SPD(1)-1;
 picture = {'1.tiff' '2.tiff' '3.tiff' '4.tiff' '5.tiff' '6.tiff' '7.tiff' '8.tiff' '9.tiff'};
 axes(handles.axes4);
-imshow(picture{SCC});
+imshow(picture{SPD(1)-1});
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -158,8 +174,12 @@ saveDataName = fullfile(pathname,filename);
 hgsave(saveDataName);
 
 function helpice_Callback(hObject, eventdata, handles)
-mih=msgbox('ICE Parameters allows you to set all the parameters that affect the performance of a vehicle.  Following your choice of SMMT category, you can now either set default values, taken from the 2009 best selling vehicle in that category or set your own','ICE Parameters help')
-       set( mih, 'color', [ 0.9 0.9 .9 ] )
+txt = ['ICE Parameters allows you to set all the parameters that ' ...
+    'affect the performance of a vehicle.  Following your choice of ' ...
+    'SMMT category, you can now either set default values, taken from ' ...
+    'the 2009 best selling vehicle in that category or set your own'];
+mih=msgbox(txt,'ICE Parameters help');
+set( mih, 'color', [ 0.9 0.9 .9 ] )
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %vehicle control buttons
@@ -205,38 +225,29 @@ madv=msgbox('Sorry, the advanced feature is still inactive','advanced');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %vehicle values
 
+% This is a generic function which checks that an input parameter is in a
+% valid range and then sets it.
+function n = generic(result,index,name)
+% eg. generic(handles.drag,1,'Drag Coefficient')
+global higher
+global lower
 
-
-
-function generic(result,index)
 n = get(result,'String');             % get the string 
-n = str2num(n);                       % convert from string to number 
+n = str2double(n);                       % convert from string to number 
 
 % If no value input, or a value not between 0 and 0.4, complain
 if (isempty(n) || n < lower(index) || n > higher(index))  
     set(result,'String','0');
     txt = sprintf('Please choose a value between %d and %d'...
         ,lower(index),higher(index));
-    m=msgbox('Please set the coefficient to a value between 'num2str(0) ' and ' num2str(0.4),'Drag Coefficient');
+    m=msgbox(txt,name);
     set( m, 'color', [ 0.9 0.9 .9 ] );
 end
 
 % Drag Coefficient 
 function drag_Callback(hObject, eventdata, handles)
-generic(handles.drag,1)
-%{
-dc = get(handles.drag,'String');        % get the string 
-dc = str2num(dc);                       % convert from string to number 
-
-% If no value input, or a value not between 0 and 0.4, complain
-if (isempty(dc) || dc < 0 || dc > 0.4)  
-    set(handles.drag,'String','0');
-    mdc=msgbox('Please set the drag coefficient to a value between 0 and 0.4','Drag Coefficient');
-    set( mdc, 'color', [ 0.9 0.9 .9 ] );
-end
-
-%}
-guidata(hObject, handles);
+generic(handles.drag,1,'drag coefficient');
+guidata(hObject, handles); % This appears to be missing from the others...
 
 function drag_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
@@ -247,15 +258,7 @@ end
 
 % Frontal Area
 function frontalarea_Callback(hObject, eventdata, handles)
-ifa = get(handles.frontalarea,'String');    % get the string
-ifa = str2num(ifa);                         % convert from string to number
-
-% Same deal
-if (isempty(ifa) || ifa < 0 || ifa > 3)  
-    set(handles.frontalarea,'String','0');
-    mifa=msgbox('please set the frontal area to a value between 0 and 3 ','frontal area');
-    set( mifa, 'color', [ 0.9 0.9 .9 ] );
-end
+generic(handles.frontalarea,2,'frontal area');
 
 function frontalarea_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
@@ -266,16 +269,9 @@ end
 
 % Weight
 function weight_Callback(hObject, eventdata, handles)
-w = get(handles.weight,'String');%get the string for the editText component
-w = str2num(w);%convert from string to number if possible, otherwise returns empty
-if (isempty(w) || w < 0)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.weight,'String','0');
-    mw=msgbox('Please set the kerb weight to a number greater than 0','Kerb Weight');
-    set(mw, 'color', [ 0.9 0.9 .9 ] );
-end
+generic(handles.weight,3,'kerb weight');
 
 function weight_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -285,8 +281,8 @@ end
 % Number of wheel drive (2 or 4)
 function wheeldrive_Callback(hObject, eventdata, handles)
 wd = get(handles.wheeldrive,'String');%get the string for the editText component
-wd = str2num(wd);%convert from string to number if possible, otherwise returns empty
-if (isempty(wd) || wd<(2) ||wd>(4)||((2)<wd && wd<(4))); %  if user inputs something is not a number, or if the input is not 2 or 4
+wd = str2double(wd);%convert from string to number if possible, otherwise returns empty
+if (isempty(wd) || ((wd~=2) && (wd~=4))) 
     set(handles.wheeldrive,'String','2');
     mwd=msgbox('Please set the wheel drive to 2 or 4','Wheel Drive');
     set(mwd,'color', [ 0.9 0.9 .9 ] );
@@ -294,7 +290,6 @@ else
 end
 
 function wheeldrive_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -303,16 +298,9 @@ end
 
 % Tyre Diameter
 function tyrediam_Callback(hObject, eventdata, handles)
-td = get(handles.tyrediam,'String');%get the string for the editText component
-td = str2num(td);%convert from string to number if possible, otherwise returns empty
-if (isempty(td) || td < 14 || td > 17)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.tyrediam,'String','0');
-    mtd=msgbox('please set the tyre diameter between 14" and 17"','tyre diameter');
-    set( mtd, 'color', [ 0.9 0.9 .9 ] );
-end
+generic(handles.tyrediam,4,'tyre diameter')
 
 function tyrediam_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -321,17 +309,9 @@ end
 
 
 function tyreroll_Callback(hObject, eventdata, handles)
-tr = get(handles.tyreroll,'String');%get the string for the editText component
-tr = str2num(tr);%convert from string to number if possible, otherwise returns empty
-if (isempty(tr) || tr < 0 || tr > 0.02)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.tyreroll,'String','0');
-    mtr=msgbox('please set the tyre rolling resistance between 0 and 0.02','tyre roll resistance');
-    set( mtr, 'color', [ 0.9 0.9 .9 ] );
-
-end
+generic(handles.tyreroll,5,'tyre roll resistance');
 
 function tyreroll_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -343,57 +323,53 @@ end
 
 %engine control buttons
 
+% Given an engine size and fuel type this sets the other two parameters
+function engine_parameters(handles,es,ft)
+% This function takes the inputs handles and the optional inputs of engine
+% size and fuel type. Note that if you don't have the enginer size you
+% can't input the fuel type
+
+% If not given, get the fuel type
+if nargin < 3
+    ft = get(handles.petrol,'value');
+end
+
+% If not given, get the engine size
+if nargin < 2
+    es = get(handles.enginesize,'string');
+    es = str2double(es);
+end
+
+% Other parameters are set dependant on fuel type
+if ft==1                            % petrol
+    if(es>0)
+        % Not really sure where these eqs come from
+        set(handles.etorque,'string',99.129*es - 9.5001);
+        set(handles.epower,'string',61.027*es - 12.571);
+    end
+    
+elseif(ft==0)                       % diesel
+    if(es>0)
+        % Again, where are these from?
+        set(handles.etorque,'string',152.78*es^1.0215);
+        set(handles.epower,'string',81.128*es - 33.592);
+    end
+end
+
+
+% This is the default option
 function enginedefault_Callback(hObject, eventdata, handles)
 global SPD;
-SCC=SPD(1)-1;
+
 default_esize = [1.1 1.4 2.0 3.0 2.0 3.2 2.0 2.2 1.9];
-engine_torque = [98 125 185 400 360 500 280 350 280];
-engine_power = [49 70.5 104.4 145 99.9 149.9 154.7 110 92];
 
 checkboxStatus = get(handles.enginedefault,'Value');
 
 if (checkboxStatus)
-set(handles.enginesize, 'string', default_esize(SCC));
-set(handles.etorque,'string',engine_torque(SCC));
-set(handles.epower,'string',engine_power(SCC));
-else   
-%set(handles.enginesize, 'string', '0');
-%set(handles.etorque,'string','0');
-%set(handles.epower,'string','0');
-
-
-e=get(handles.enginesize,'string');
-es=str2num(e);
-ft=get(handles.petrol,'value');
-if (ft==1)
-    if(es>0)
-    et=(99.129*es - 9.5001);
-    ep=(61.027*es - 12.571);
-    set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-
-    else
-        et=0;
-        ep=0;
-        set(handles.etorque,'string',et);
-        set(handles.epower,'string',ep);
-
-    end
-elseif(ft==0)
-    if(es>0)
-    et=(152.78*es^1.0215);
-    ep=(81.128*es - 33.592);
-    set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-
-    else
-        et=0;
-        ep=0;
-    set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-
-    end    
-end
+    % Set the following based on SMMT specific standards
+    es = default_esize(SPD(1)-1);
+    set(handles.enginesize, 'string', es);
+    engine_parameters(handles,es)
 end
 
 
@@ -415,47 +391,17 @@ madv=msgbox('Sorry, the advanced feature is still inactive','advanced');
 function fuel_type_SelectionChangeFcn(hObject, eventdata)
 handles=guidata(hObject);
 
+% If diesel chosen display option for turbocharged
 switch get(eventdata.NewValue,'Tag')   % Get Tag of selected object
     case 'diesel'
-      set(handles.turbocharged,'Visible','on');
-      set(handles.turbocharged,'value',1);
+        set(handles.turbocharged,'Visible','on');
+        set(handles.turbocharged,'value',1);
     otherwise
         set(handles.turbocharged,'Visible','off');
         set(handles.turbocharged,'value',0);
 end
 
-ft=get(handles.petrol,'value');
-e=get(handles.enginesize,'string');
-es=str2num(e);
-
-if (ft==1)
-    if(es>0)
-    et=(99.129*es - 9.5001);
-    ep=(61.027*es - 12.571);
-    set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-    else
-        et=0;
-        ep=0;
-        set(handles.etorque,'string',et);
-        set(handles.epower,'string',ep);
-    end
-elseif(ft==0)
-    if(es>0)
-    et=(152.78*es^1.0215);
-    ep=(81.128*es - 33.592);
-    set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-    else
-        et=0;
-        ep=0;
-        set(handles.etorque,'string',et);
-        set(handles.epower,'string',ep);
-    end
-end
-
-
-
+engine_parameters(handles)
 guidata(hObject, handles);
 
 
@@ -469,92 +415,20 @@ if(ft==0||tc==0)
 else
 end
 
-
 function enginesize_Callback(hObject, eventdata, handles)
 global SPD
-t=SPD(1);
-e=get(handles.enginesize,'string');
-es=str2num(e);
-if(t==2)
-    if (isempty(es) || es > 1.1)  
-    set(handles.enginesize,'String','0');
-    met=msgbox('the engine size for a Mini Smmt Category type vehicle cannot be greater than 1.1','engine size');
-    set( met, 'color', [ 0.9 0.9 .9 ] );
-    end
-elseif(t==3)
-    if (isempty(es) || es<1 || es > 1.4)  
-    set(handles.enginesize,'String','0');
-    met=msgbox('the engine size for a Supermini Smmt Category type vehicle should be between 1 and 1.4','engine size');
-    set( met, 'color', [ 0.9 0.9 .9 ] );
-    end
-elseif(t==4)
-    if (isempty(es) || es<1.3 || es > 2.0)  
-    set(handles.enginesize,'String','0');
-    met=msgbox('the engine size for a Lower Medium Smmt Category type vehicle should be between 1.3 and 2.0','engine size');
-    set( met, 'color', [ 0.9 0.9 .9 ] );
-    end
-elseif(t==5)
-    if (isempty(es) || es<1.6 || es > 3.0)  
-    set(handles.enginesize,'String','0');
-    met=msgbox('the engine size for an Upper Medium Smmt Category type vehicle should be between 1.6 and 3.0','engine size');
-    set( met, 'color', [ 0.9 0.9 .9 ] );
-    end
-elseif(t==6)
-    if (isempty(es) || es<2 || es > 3.5)  
-    set(handles.enginesize,'String','0');
-    met=msgbox('the engine size for an Executive Smmt Category type vehicle should be between 2 and 3.5','engine size');
-    set( met, 'color', [ 0.9 0.9 .9 ] );
-    end
-elseif(t==7)
-    if (isempty(es) || es < 3.5)  
-    set(handles.enginesize,'String','0');
-    met=msgbox('the engine size for a Luxury Smmt Category type vehicle should be larger than 3.5','engine size');
-    set( met, 'color', [ 0.9 0.9 .9 ] );
-    end
-else
-end  
-
-ft=get(handles.petrol,'value')
-if (ft==1)
-    if(es>0)
-    et=(99.129*es - 9.5001);
-    ep=(61.027*es - 12.571);
-    set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-    else
-        et=0;
-        ep=0;
-        set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-    end
-elseif(ft==0)
-    if(es>0)
-    et=(152.78*es^1.0215);
-    ep=(81.128*es - 33.592);
-    set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-    else
-        et=0;
-        ep=0;
-        set(handles.etorque,'string',et);
-    set(handles.epower,'string',ep);
-    end
-end
-
-
-
+% This checks the size of the engine size is within the correct limits
+% relative to the SMMT catergory, the +4 is just the offset of the
+% positions of the limits in the 'lower' and 'upper' vectors
+es = generic(handles.enginesize,SPD(1)+4,'enginesize');
+engine_parameters(handles,es)
 
 function enginesize_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %transmission control buttons
@@ -562,7 +436,6 @@ end
 function gbdefault_Callback(hObject, eventdata, handles)
 global SPD;
 
-SCC=SPD(1)-1;
 top_gear_number = [5 5 5 6 6 7 6 6 6];
 top_gear_ratio = [.72 .76 .77 .84 .83 .73 .92 .64 .61];
 final_drive_ratio = [4.6 4.06 3.56 2.35 2.47 2.82 3.14 4.11 3.65];
@@ -572,22 +445,16 @@ checkboxStatus = get(handles.gbdefault,'Value');
 
 if(ttype==1)
     if(checkboxStatus) %if multigear box is chosen and default is checked,   
-        set(handles.gbspd, 'string', top_gear_number(SCC));
-        set(handles.tgratio, 'string', top_gear_ratio (SCC));
-        set(handles.fgratio, 'string', final_drive_ratio(SCC));
+        set(handles.gbspd, 'string', top_gear_number(SPD(1)-1));
+        set(handles.tgratio, 'string', top_gear_ratio (SPD(1)-1));
+        set(handles.fgratio, 'string', final_drive_ratio(SPD(1)-1));
         set(handles.gbeffy, 'string', '95');
         set(handles.axleffy, 'string', '100');
-    else
-        set(handles.gbspd, 'string', '0');
-        set(handles.tgratio, 'string', '0');
-        set(handles.fgratio, 'string', '0');
-        set(handles.gbeffy, 'string', '0');
-        set(handles.axleffy, 'string', '0');
     end
 elseif(ttype==0) %if CVT is chosen and default is automatic
         set(handles.gbspd,'string','100');
-        set(handles.tgratio, 'string', top_gear_ratio (SCC));
-        set(handles.fgratio, 'string', final_drive_ratio(SCC));
+        set(handles.tgratio, 'string', top_gear_ratio (SPD(1)-1));
+        set(handles.fgratio, 'string', final_drive_ratio(SPD(1)-1));
         set(handles.gbeffy, 'string', '95');
         set(handles.axleffy, 'string', '100');
 end
@@ -610,54 +477,53 @@ handles=guidata(hObject);
 
 global SPD;
 
-SCC=SPD(1)-1;
 top_gear_number = [5 5 5 6 6 7 6 6 6];
 top_gear_ratio = [.72 .76 .77 .84 .83 .73 .92 .64 .61];
 final_drive_ratio = [4.6 4.06 3.56 2.35 2.47 2.82 3.14 4.11 3.65];
 
 switch get(eventdata.NewValue,'Tag')   % Get Tag of selected object
     case 'multigear'
-      set(handles.text46,'Visible','on');
-      set(handles.text47,'Visible','on');
-      set(handles.text50,'Visible','on');
-      set(handles.text48,'Visible','on');
-      set(handles.text49,'Visible','on');
-      set(handles.text33,'Visible','on');
-      set(handles.text27,'Visible','on');
-      set(handles.gbspd,'Visible','on');
-      set(handles.gbspd,'string','0');
-      set(handles.tgratio,'Visible','on');
-      set(handles.tgratio,'string','0');
-      set(handles.fgratio,'Visible','on');
-      set(handles.fgratio,'string','0');
-      set(handles.gbeffy,'Visible','on');
-      set(handles.gbeffy,'string','0');
-      set(handles.axleffy,'Visible','on');
-      set(handles.axleffy,'string','0');
-      set(handles.gbdefault,'Visible','on');
-      set(handles.gbreset,'Visible','on');
-      set(handles.gbadvanced,'Visible','on');
+        set(handles.text46,'Visible','on');
+        set(handles.text47,'Visible','on');
+        set(handles.text50,'Visible','on');
+        set(handles.text48,'Visible','on');
+        set(handles.text49,'Visible','on');
+        set(handles.text33,'Visible','on');
+        set(handles.text27,'Visible','on');
+        set(handles.gbspd,'Visible','on');
+        set(handles.gbspd,'string','0');
+        set(handles.tgratio,'Visible','on');
+        set(handles.tgratio,'string','0');
+        set(handles.fgratio,'Visible','on');
+        set(handles.fgratio,'string','0');
+        set(handles.gbeffy,'Visible','on');
+        set(handles.gbeffy,'string','0');
+        set(handles.axleffy,'Visible','on');
+        set(handles.axleffy,'string','0');
+        set(handles.gbdefault,'Visible','on');
+        set(handles.gbreset,'Visible','on');
+        set(handles.gbadvanced,'Visible','on');
     otherwise
         set(handles.text46,'Visible','off');
-      set(handles.text47,'Visible','off');
-      set(handles.text50,'Visible','off');
-      set(handles.text48,'Visible','off');
-      set(handles.text49,'Visible','off');
-      set(handles.text33,'Visible','off');
-      set(handles.text27,'Visible','off');
-      set(handles.gbspd,'Visible','off');
-      set(handles.gbspd,'string','100');
-      set(handles.tgratio,'Visible','off');
-      set(handles.tgratio, 'string', top_gear_ratio (SCC));
-      set(handles.fgratio,'Visible','off');
-      set(handles.fgratio, 'string', final_drive_ratio(SCC));
-      set(handles.gbeffy,'Visible','off');
-      set(handles.gbeffy,'string','95');
-      set(handles.axleffy,'Visible','off');
-      set(handles.axleffy,'string','100');
-      set(handles.gbdefault,'Visible','off');
-      set(handles.gbreset,'Visible','off');
-      set(handles.gbadvanced,'Visible','off');
+        set(handles.text47,'Visible','off');
+        set(handles.text50,'Visible','off')
+        set(handles.text48,'Visible','off');
+        set(handles.text49,'Visible','off');
+        set(handles.text33,'Visible','off');
+        set(handles.text27,'Visible','off');
+        set(handles.gbspd,'Visible','off');
+        set(handles.gbspd,'string','100');
+        set(handles.tgratio,'Visible','off');
+        set(handles.tgratio, 'string', top_gear_ratio(SPD(1)-1));
+        set(handles.fgratio,'Visible','off');
+        set(handles.fgratio, 'string', final_drive_ratio(SPD(1)-1));
+        set(handles.gbeffy,'Visible','off');
+        set(handles.gbeffy,'string','95');
+        set(handles.axleffy,'Visible','off');
+        set(handles.axleffy,'string','100');
+        set(handles.gbdefault,'Visible','off');
+        set(handles.gbreset,'Visible','off');
+        set(handles.gbadvanced,'Visible','off');
 end
 
 guidata(hObject, handles);
@@ -668,23 +534,15 @@ guidata(hObject, handles);
 
 function gbspd_Callback(hObject, eventdata, handles)
 global SPD
-SCC=SPD(1)-1
 top_gear_ratio = [.72 .76 .77 .84 .83 .73 .92 .64 .61];
 final_drive_ratio = [4.6 4.06 3.56 2.35 2.47 2.82 3.14 4.11 3.65];
 
-gbs = get(handles.gbspd,'String');%get the string for the editText component
-gbs = str2num(gbs);%convert from string to number if possible, otherwise returns empty
-if (isempty(gbs) || gbs < 4 || gbs > 7)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.gbspd,'String','0');
-    mgbs=msgbox('please set the gearbox speed value between 4 and 7','gearbox speed');
-    set( mgbs, 'color', [ 0.9 0.9 .9 ] )
-end
-
-gbt=get(handles.multigear,'value')
+gbs = generic(handles.gbspd,12,'gearbox speed');
+gbt=get(handles.multigear,'value');
 
 if (gbt==1 && gbs>0)
-        set (handles.tgratio,'string',top_gear_ratio(SCC));
-        set (handles.fgratio,'string',final_drive_ratio(SCC));
+        set (handles.tgratio,'string',top_gear_ratio(SPD(1)-1));
+        set (handles.fgratio,'string',final_drive_ratio(SPD(1)-1));
 else
 end
 
@@ -698,14 +556,8 @@ end
 
 
 function tgratio_Callback(hObject, eventdata, handles)
-tgr = get(handles.tgratio,'String');%get the string for the editText component
-tgr = str2num(tgr);%convert from string to number if possible, otherwise returns empty
-if (isempty(tgr) || tgr < 0 || tgr > 1)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.tgratio,'String','0');
-    mtgr=msgbox('please set the top gear ratio value between 0 and 1','top gear ratio');
-    set( mtgr, 'color', [ 0.9 0.9 .9 ] )
+generic(handles.tgratio,13,'top gear ratio')
 
-end
 
 function tgratio_CreateFcn(hObject, eventdata, handles)
 
@@ -717,14 +569,8 @@ end
 
 
 function fgratio_Callback(hObject, eventdata, handles)
-fgr = get(handles.fgratio,'String');%get the string for the editText component
-fgr = str2num(fgr);%convert from string to number if possible, otherwise returns empty
-if (isempty(fgr) || fgr < 2 || fgr > 5)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.fgratio,'String','0');
-    mfgr=msgbox('please set the final gear ratio value between 2 and 5','final gear ratio');
-    set( mfgr, 'color', [ 0.9 0.9 .9 ] )
+generic(handles.fgratio,14,'final gear ratio')
 
-end
 
 function fgratio_CreateFcn(hObject, eventdata, handles)
 
@@ -737,14 +583,8 @@ end
 
 
 function gbeffy_Callback(hObject, eventdata, handles)
-gbe = get(handles.gbeffy,'String');%get the string for the editText component
-gbe = str2num(gbe);%convert from string to number if possible, otherwise returns empty
-if (isempty(gbe) || gbe < 0 || gbe > 100)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.gbeffy,'String','0');
-    mgbe=msgbox('please set the gearbox efficiency value between 0 and 100','gearbox efficiency');
-    set( mgbe, 'color', [ 0.9 0.9 .9 ] )
+generic(handles.gbeffy,15,'gearbox efficiency')
 
-end
 
 function gbeffy_CreateFcn(hObject, eventdata, handles)
 
@@ -757,14 +597,8 @@ end
 
 
 function axleffy_Callback(hObject, eventdata, handles)
-ae = get(handles.axleffy,'String');%get the string for the editText component
-ae = str2num(ae);%convert from string to number if possible, otherwise returns empty
-if (isempty(ae) || ae < 0 || ae > 100)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.axleffy,'String','0');
-    mae=msgbox('please set the axle efficiency value between 0 and 100','axle efficiency');
-    set( mae, 'color', [ 0.9 0.9 .9 ] )
+generic(handles.axleffy,16,'axle efficiency')
 
-end
 
 function axleffy_CreateFcn(hObject, eventdata, handles)
 
@@ -779,21 +613,16 @@ end
 
 function rangedefault_Callback(hObject, eventdata, handles)
 rd=get(handles.rangedefault,'value');
+
 if(rd==1)
-set(handles.range,'string','950');
+    set(handles.range,'string','950');
 else
     set(handles.range,'string','0');
 end
 
 function range_Callback(hObject, eventdata, handles)
-rng1 = get(handles.range,'String');%get the string for the editText component
-rng = str2num(rng1);%convert from string to number if possible, otherwise returns empty
-if (isempty(rng) || rng < 0)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.range,'String','0');
-    mrng=msgbox('please set the Range value greater that 0','Range');
-    set( mrng, 'color', [ 0.9 0.9 .9 ] )
-else 
-end
+generic(handles.range,17,'range')
+
 
 function range_CreateFcn(hObject, eventdata, handles)
 
@@ -826,7 +655,7 @@ end
 
 %function regeneffy_Callback(hObject, eventdata, handles)
 %reg = get(handles.regeneffy,'String');%get the string for the editText component
-%reg = str2num(reg);%convert from string to number if possible, otherwise returns empty
+%reg = str2double(reg);%convert from string to number if possible, otherwise returns empty
 %if (isempty(reg) || reg < 0 || reg > 100)  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
 %    set(handles.regeneffy,'String','0');
 %    mreg=msgbox('please set the regeneration efficiency value between 0 and 100','Regenerative Efficiency');
@@ -856,6 +685,8 @@ end
  
 
 function setice_Callback(hObject, eventdata, handles);
+% Updates all of the global parameters
+
 global VP
 global PS
 global EP
@@ -864,56 +695,60 @@ global T
 global VR
 global SET
 
+dc=get(handles.drag, 'string');         % drag coefficient
+dc=str2double(dc);
+fa=get(handles.frontalarea, 'string');  % frontal area
+fa=str2double(fa);
+kw=get(handles.weight, 'string');       % kerb weight
+kw=str2double(kw);                      
+wd=get(handles.wheeldrive, 'string');   % no. driven wheels
+wd=str2double(wd);
+td=get(handles.tyrediam, 'string');     % tyre diameter
+td=str2double(td);
+tr=get(handles.tyreroll, 'string');     % tyre rolling resistance
+tr=str2double(tr);
 
-dc1=get(handles.drag, 'string');
-dc=str2num(dc1);
-fa1=get(handles.frontalarea, 'string');
-fa=str2num(fa1);
-kw1=get(handles.weight, 'string');
-kw=str2num(kw1);
-wd1=get(handles.wheeldrive, 'string');
-wd=str2num(wd1);
-td1=get(handles.tyrediam, 'string');
-td=str2num(td1);
-tr1=get(handles.tyreroll, 'string');
-tr=str2num(tr1);
 VP=[dc fa kw wd td tr];
 
 %r=get(handles.regen,'value');
 %regeffy=get(handles.regeneffy,'string');
-%reffy=str2num(regeffy);
+%reffy=str2double(regeffy);
 
 ft=get(handles.petrol, 'value');  % 1=petrol, 0=diesel
 tc=get(handles.turbocharged,'value'); % 1=turbocharged, 0=not turbocharged
+
 PS=[0 3 ft tc];
 
-es1=get(handles.enginesize, 'string');
-es=str2num(es1);
-et1=get(handles.etorque, 'string');
-et=str2num(et1);
-ep1=get(handles.epower, 'string');
-ep=str2num(ep1);
+es=get(handles.enginesize, 'string');   % engine size
+es=str2double(es);
+et=get(handles.etorque, 'string');      % engine torque
+et=str2double(et);
+ep=get(handles.epower, 'string');       % engine power
+ep=str2double(ep);
+
 EP=[es et ep];
 
 MP=[0 0 0];
 
 gbt=get(handles.multigear, 'value'); % 1=multigear, 0=CVT
-gbs1=get(handles.gbspd, 'string');
-gbs=str2num(gbs1);
-tgr1=get(handles.tgratio, 'string');
-tgr=str2num(tgr1);
-fgr1=get(handles.fgratio, 'string');
-fgr=str2num(fgr1);
-gbe1=get(handles.gbeffy, 'string');
-gbe=str2num(gbe1);
-axe1=get(handles.axleffy, 'string');
-axe=str2num(axe1);
+
+gbs=get(handles.gbspd, 'string');       % gearbox speed
+gbs=str2double(gbs);
+tgr=get(handles.tgratio, 'string');     % top gear ratio
+tgr=str2double(tgr);
+fgr=get(handles.fgratio, 'string');     % final gear ratio
+fgr=str2double(fgr);
+gbe=get(handles.gbeffy, 'string');      % gearbox efficiency
+gbe=str2double(gbe);
+axe=get(handles.axleffy, 'string');     % axle efficiency
+axe=str2double(axe);
+
 T=[gbt gbs tgr fgr gbe axe];
 
 rng1=get(handles.range,'string');
-rng=str2num(rng1);
+rng=str2double(rng1);
 %reg1=get(handles.regeneffy,'string');
-%reg=str2num(reg1);
+%reg=str2double(reg1);
 VR=[rng 0];
 
 if(VP(1)==0||VP(2)==0||VP(3)==0||VP(4)==0||VP(5)==0||VP(6)==0)
