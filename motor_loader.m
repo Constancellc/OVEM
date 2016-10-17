@@ -10,6 +10,8 @@ function [w_max,rotor_inertia,speed_range,torque_range,eff_matrix,T_max_speed_ve
 %Purpose: To load the selected motor parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% NOTE: I DON'T APPEAR TO HAVE THE FIRST 6 FILES!!!
+
 %Load selected motor
 
 if motor_selection == 1                 %USM power phase 100

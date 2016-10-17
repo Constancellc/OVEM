@@ -64,6 +64,7 @@ global T
 global VR
 global SET
 global SETVC %set vehicle comparison
+
 SPD=[0 0 0];
 VP=[0 0 0 0 0 0]; % rests all the global variables on cancel
 PS=[0 0 0 0];

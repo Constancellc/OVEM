@@ -26,145 +26,146 @@ gears = find_gear_ratio(simulate,final_drive_ratio,top_gear_ratio,...
 else
     gears = gear_ratio_vector;
 end
-    %% Velocity Achieved Vector Generation
-    v_ach=single(zeros(drive_cycle_length,1));
-    v_ach(1)=v_req(1);
 
-    %Distance Achieved Scalar Initialization
-    distance_ach=0;
+%% Velocity Achieved Vector Generation
+v_ach=single(zeros(drive_cycle_length,1));
+v_ach(1)=v_req(1);
 
-    %Backwards vehicle vector generation
-    F_b_vehicle_to_wheelaxle=zeros(drive_cycle_length-1,1);
-    v_b_vehicle_to_wheelaxle=single(zeros(drive_cycle_length-1,1));
-    percent_of_weight_on_rear_axle = v_b_vehicle_to_wheelaxle;
-    percent_of_weight_on_front_axle = v_b_vehicle_to_wheelaxle;
+%Distance Achieved Scalar Initialization
+distance_ach=0;
 
-    %Backwards wheelaxle vector generation
-    T_b_wheelaxle_to_gb=zeros(drive_cycle_length-1,1);
-    w_b_wheelaxle_to_gb=zeros(drive_cycle_length-1,1);
-    P_b_wheelaxle_to_gb=zeros(drive_cycle_length-1,1);
+%Backwards vehicle vector generation
+F_b_vehicle_to_wheelaxle=zeros(drive_cycle_length-1,1);
+v_b_vehicle_to_wheelaxle=single(zeros(drive_cycle_length-1,1));
+percent_of_weight_on_rear_axle = v_b_vehicle_to_wheelaxle;
+percent_of_weight_on_front_axle = v_b_vehicle_to_wheelaxle;
 
-    %Backwards gear box vector generation
-    T_b_gb=zeros(drive_cycle_length-1,1);
-    w_b_gb=zeros(drive_cycle_length-1,1);
-    P_b_gb=zeros(drive_cycle_length-1,1);
-    vgb_b_eff=zeros(drive_cycle_length-1,1);
-    vgb_b_mass_int = vgb_b_eff;
-    vgb_b_cost_int = vgb_b_eff;
+%Backwards wheelaxle vector generation
+T_b_wheelaxle_to_gb=zeros(drive_cycle_length-1,1);
+w_b_wheelaxle_to_gb=zeros(drive_cycle_length-1,1);
+P_b_wheelaxle_to_gb=zeros(drive_cycle_length-1,1);
 
-    %Backwards ICE vector generation
-    ice_b_eff=zeros(drive_cycle_length-1,1);
-    %fuel_energy_demand = zeros(drive_cycle_length,1);
-    %P_reqd_by_ice = ice_b_eff;
-    %T_reqd_by_ice = ice_b_eff;
-    %w_reqd_by_ice = ice_b_eff;
-    P_f_reqd_by_ice = ice_b_eff;
-    di_used_by_ice = ice_b_eff;
-  %  T_f_reqd_by_ice = ice_b_eff;
-   % w_f_reqd_by_ice = ice_b_eff;
-    gear_number = ice_b_eff;
-    gear_number_f = gear_number;
+%Backwards gear box vector generation
+T_b_gb=zeros(drive_cycle_length-1,1);
+w_b_gb=zeros(drive_cycle_length-1,1);
+P_b_gb=zeros(drive_cycle_length-1,1);
+vgb_b_eff=zeros(drive_cycle_length-1,1);
+vgb_b_mass_int = vgb_b_eff;
+vgb_b_cost_int = vgb_b_eff;
 
-    
-    %Forwards Motor vector generation
-    T_f_reqd_by_gb=zeros(drive_cycle_length-1,1);
-    w_f_reqd_by_gb=zeros(drive_cycle_length-1,1);
-    %P_f_reqd_by_gb = w_f_reqd_by_gb;
-    ice_f_eff=zeros(drive_cycle_length-1,1);
-    di_ice_2_eff=ice_f_eff;
+%Backwards ICE vector generation
+ice_b_eff=zeros(drive_cycle_length-1,1);
+%fuel_energy_demand = zeros(drive_cycle_length,1);
+%P_reqd_by_ice = ice_b_eff;
+%T_reqd_by_ice = ice_b_eff;
+%w_reqd_by_ice = ice_b_eff;
+P_f_reqd_by_ice = ice_b_eff;
+di_used_by_ice = ice_b_eff;
+%  T_f_reqd_by_ice = ice_b_eff;
+% w_f_reqd_by_ice = ice_b_eff;
+gear_number = ice_b_eff;
+gear_number_f = gear_number;
 
-    %Forwards gear box vector generation
-    T_f_gb_to_wheelaxle=single(zeros(drive_cycle_length-1,1));
-    w_f_gb_to_wheelaxle=single(zeros(drive_cycle_length-1,1));
-    
-    %T_f_reqd_by_wheelaxle=zeros(drive_cycle_length-1,1);
-    %w_f_reqd_by_wheelaxle=zeros(drive_cycle_length-1,1);
-    P_f_reqd_by_wheelaxle=zeros(drive_cycle_length-1,1);
-    vgb_f_eff=zeros(drive_cycle_length-1,1);
-    vgb_f_mass_int = vgb_b_eff;
-    vgb_f_cost_int = vgb_b_eff;
-    %mj_in_tank = vgb_b_eff;
 
-    %Forwards wheel/axle vector generation
-    F_f_wheelaxle_to_vehicle=zeros(drive_cycle_length-1,1);
-    v_f_wheelaxle_to_vehicle=zeros(drive_cycle_length-1,1);
-    P_f_mechbrake=zeros(drive_cycle_length-1,1);
-    
+%Forwards Motor vector generation
+T_f_reqd_by_gb=zeros(drive_cycle_length-1,1);
+w_f_reqd_by_gb=zeros(drive_cycle_length-1,1);
+%P_f_reqd_by_gb = w_f_reqd_by_gb;
+ice_f_eff=zeros(drive_cycle_length-1,1);
+di_ice_2_eff=ice_f_eff;
+
+%Forwards gear box vector generation
+T_f_gb_to_wheelaxle=single(zeros(drive_cycle_length-1,1));
+w_f_gb_to_wheelaxle=single(zeros(drive_cycle_length-1,1));
+
+%T_f_reqd_by_wheelaxle=zeros(drive_cycle_length-1,1);
+%w_f_reqd_by_wheelaxle=zeros(drive_cycle_length-1,1);
+P_f_reqd_by_wheelaxle=zeros(drive_cycle_length-1,1);
+vgb_f_eff=zeros(drive_cycle_length-1,1);
+vgb_f_mass_int = vgb_b_eff;
+vgb_f_cost_int = vgb_b_eff;
+%mj_in_tank = vgb_b_eff;
+
+%Forwards wheel/axle vector generation
+F_f_wheelaxle_to_vehicle=zeros(drive_cycle_length-1,1);
+v_f_wheelaxle_to_vehicle=zeros(drive_cycle_length-1,1);
+P_f_mechbrake=zeros(drive_cycle_length-1,1);
+
 %     v1_ach_from_T_available=zeros(drive_cycle_length-1,1);
 %     v1_ach_from_speed_available=zeros(drive_cycle_length-1,1);
 
-    in_out_of_wheel = 0;
-    regen_status = 0;
-    ice_status = 1;
+in_out_of_wheel = 0;
+regen_status = 0;
+ice_status = 1;
     
 for i=1:drive_cycle_length-1
 
-%Vehicle backwards
-[F_b_vehicle_to_wheelaxle(i),v_b_vehicle_to_wheelaxle(i),slope_for_this_step,...
-    percent_of_weight_on_front_axle(i),percent_of_weight_on_rear_axle(i)] = ...
-    vehicle_backwards_3(v_ach(i),v_req(i+1),timestep,Cd,Af,rho_air,veh_mass,...
-    Crr,distance_ach,distance_req_alt,slope,wheelbase,L1,L2,h,1,1);
+    %Vehicle backwards
+    [F_b_vehicle_to_wheelaxle(i),v_b_vehicle_to_wheelaxle(i),slope_for_this_step,...
+        percent_of_weight_on_front_axle(i),percent_of_weight_on_rear_axle(i)] = ...
+        vehicle_backwards_3(v_ach(i),v_req(i+1),timestep,Cd,Af,rho_air,veh_mass,...
+        Crr,distance_ach,distance_req_alt,slope,wheelbase,L1,L2,h,1,1);
 
-%Force in N, velocity in m/s => power in Watts, torque in Nm, w in rad/s.
+    %Force in N, velocity in m/s => power in Watts, torque in Nm, w in rad/s.
 
-%Wheel/axle backwards
-[T_b_wheelaxle_to_gb(i),w_b_wheelaxle_to_gb(i),P_b_wheelaxle_to_gb(i)] = ...
-    wheelaxle_backwards_3(F_b_vehicle_to_wheelaxle(i),v_b_vehicle_to_wheelaxle(i),...
-    v_ach(i),v_req(i+1),tire_radius,timestep,total_driven_wheelaxle_inertia,...
-    in_out_of_wheel,number_of_driven_wheels,wheelaxle_efficiency,regen_status,...
-    percent_of_weight_on_front_axle(i),percent_of_weight_on_rear_axle(i),...
-    front_or_rear_wheel_drive,dynamic_braking);               
+    %Wheel/axle backwards
+    [T_b_wheelaxle_to_gb(i),w_b_wheelaxle_to_gb(i),P_b_wheelaxle_to_gb(i)] = ...
+        wheelaxle_backwards_3(F_b_vehicle_to_wheelaxle(i),v_b_vehicle_to_wheelaxle(i),...
+        v_ach(i),v_req(i+1),tire_radius,timestep,total_driven_wheelaxle_inertia,...
+        in_out_of_wheel,number_of_driven_wheels,wheelaxle_efficiency,regen_status,...
+        percent_of_weight_on_front_axle(i),percent_of_weight_on_rear_axle(i),...
+        front_or_rear_wheel_drive,dynamic_braking);               
 
-%Gb backwards
-[T_b_gb(i),w_b_gb(i),P_b_gb(i),vgb_b_eff(i),vgb_b_mass_int(i),vgb_b_cost_int(i),...
-    gear_number(i)]=gb_multispeed_backwards(max_P,P_b_wheelaxle_to_gb(i),...
-    T_b_wheelaxle_to_gb(i),w_b_wheelaxle_to_gb(i),peak_ice_T,k_seal,k_bearing,...
-    k_mesh,v_ach(i),v_req(i+1),tire_radius,timestep,min_w,peak_ice_w,min_n_w,...
-    max_n_w,top_gear_number,top_gear_ratio,gear_ratio_vector,final_drive_ratio,...
-    gears,w_range); 
+    %Gb backwards
+    [T_b_gb(i),w_b_gb(i),P_b_gb(i),vgb_b_eff(i),vgb_b_mass_int(i),vgb_b_cost_int(i),...
+        gear_number(i)]=gb_multispeed_backwards(max_P,P_b_wheelaxle_to_gb(i),...
+        T_b_wheelaxle_to_gb(i),w_b_wheelaxle_to_gb(i),peak_ice_T,k_seal,k_bearing,...
+        k_mesh,v_ach(i),v_req(i+1),tire_radius,timestep,min_w,peak_ice_w,min_n_w,...
+        max_n_w,top_gear_number,top_gear_ratio,gear_ratio_vector,final_drive_ratio,...
+        gears,w_range); 
 
-% % Engine backwards
-% [P_reqd_by_ice(i),ice_b_eff(i)]=si_ice_backwards(P_b_gb(i),T_b_gb(i),w_b_gb(i),max_P,...
-%     peak_ice_T,peak_ice_w,min_w,ice_status);
-% 
-% %Fuel tank
-%         if i==1 % account for zero fuel being removed prior to the first time step
-%             fuel_energy_demand(i) = 0;
-%               mj_in_tank(i) = fuel_mj;
-%         else
-%               fuel_energy_demand(i) = (T_reqd_by_ice(i)*w_reqd_by_ice(i)/1000*timestep/3600)/3.6;
-%               mj_in_tank(i) = fuel_mj - fuel_energy_demand(i);
-%         end
-% 
-% %Engine forwards
-% [P_f_reqd_by_gb(i),T_f_reqd_by_gb(i),w_f_reqd_by_gb(i),ice_f_eff(i)]=si_ice_forwards(P_reqd_by_ice(i),T_b_gb(i),w_b_gb(i),...
-%     max_P,peak_ice_T,peak_ice_w,min_w);
+    % % Engine backwards
+    % [P_reqd_by_ice(i),ice_b_eff(i)]=si_ice_backwards(P_b_gb(i),T_b_gb(i),w_b_gb(i),max_P,...
+    %     peak_ice_T,peak_ice_w,min_w,ice_status);
+    % 
+    % %Fuel tank
+    %         if i==1 % account for zero fuel being removed prior to the first time step
+    %             fuel_energy_demand(i) = 0;
+    %               mj_in_tank(i) = fuel_mj;
+    %         else
+    %               fuel_energy_demand(i) = (T_reqd_by_ice(i)*w_reqd_by_ice(i)/1000*timestep/3600)/3.6;
+    %               mj_in_tank(i) = fuel_mj - fuel_energy_demand(i);
+    %         end
+    % 
+    % %Engine forwards
+    % [P_f_reqd_by_gb(i),T_f_reqd_by_gb(i),w_f_reqd_by_gb(i),ice_f_eff(i)]=si_ice_forwards(P_reqd_by_ice(i),T_b_gb(i),w_b_gb(i),...
+    %     max_P,peak_ice_T,peak_ice_w,min_w);
 
-%Engine
-[P_f_reqd_by_ice(i),T_f_reqd_by_gb(i),w_f_reqd_by_gb(i),di_ice_2_eff(i),di_used_by_ice(i)]=...
-    level_3_di_ice(P_b_gb(i),T_b_gb(i),w_b_gb(i),max_P,peak_ice_T,peak_ice_w,...
-    min_w,ice_status,di_map,min_di_ice_2_eff);
+    %Engine
+    [P_f_reqd_by_ice(i),T_f_reqd_by_gb(i),w_f_reqd_by_gb(i),di_ice_2_eff(i),di_used_by_ice(i)]=...
+        level_3_di_ice(P_b_gb(i),T_b_gb(i),w_b_gb(i),max_P,peak_ice_T,peak_ice_w,...
+        min_w,ice_status,di_map,min_di_ice_2_eff);
 
-%GB forwards
-[P_f_reqd_by_wheelaxle(i),T_f_gb_to_wheelaxle(i),w_f_gb_to_wheelaxle(i),...
-    vgb_f_eff(i),vgb_f_mass_int(i),vgb_f_cost_int(i),gear_number_f(i)]=...
-    gb_multispeed_forwards(max_P,P_f_reqd_by_ice(i),T_f_reqd_by_gb(i),...
-    w_f_reqd_by_gb(i),peak_ice_T,k_seal,k_bearing,k_mesh,v_ach(i),v_req(i+1),...
-    tire_radius,timestep,min_w,peak_ice_w,min_n_w,max_n_w,top_gear_number,...
-    top_gear_ratio,gear_ratio_vector,final_drive_ratio,gears,w_range,...
-    w_b_wheelaxle_to_gb(i));
+    %GB forwards
+    [P_f_reqd_by_wheelaxle(i),T_f_gb_to_wheelaxle(i),w_f_gb_to_wheelaxle(i),...
+        vgb_f_eff(i),vgb_f_mass_int(i),vgb_f_cost_int(i),gear_number_f(i)]=...
+        gb_multispeed_forwards(max_P,P_f_reqd_by_ice(i),T_f_reqd_by_gb(i),...
+        w_f_reqd_by_gb(i),peak_ice_T,k_seal,k_bearing,k_mesh,v_ach(i),v_req(i+1),...
+        tire_radius,timestep,min_w,peak_ice_w,min_n_w,max_n_w,top_gear_number,...
+        top_gear_ratio,gear_ratio_vector,final_drive_ratio,gears,w_range,...
+        w_b_wheelaxle_to_gb(i));
 
-%Wheel/axle forwards
-[F_f_wheelaxle_to_vehicle(i),v_f_wheelaxle_to_vehicle(i),P_f_mechbrake(i)] = ...
-    wheelaxle_forwards_3(T_f_gb_to_wheelaxle(i),w_f_gb_to_wheelaxle(i),...
-    tire_radius,wheelaxle_efficiency,v_req(i+1),v_ach(i),...
-    total_driven_wheelaxle_inertia,timestep,F_b_vehicle_to_wheelaxle(i),number_of_motors);
+    %Wheel/axle forwards
+    [F_f_wheelaxle_to_vehicle(i),v_f_wheelaxle_to_vehicle(i),P_f_mechbrake(i)] = ...
+        wheelaxle_forwards_3(T_f_gb_to_wheelaxle(i),w_f_gb_to_wheelaxle(i),...
+        tire_radius,wheelaxle_efficiency,v_req(i+1),v_ach(i),...
+        total_driven_wheelaxle_inertia,timestep,F_b_vehicle_to_wheelaxle(i),number_of_motors);
 
-[v_ach(i+1)]=vehicle_fowards_3(F_f_wheelaxle_to_vehicle(i),v_f_wheelaxle_to_vehicle(i),...
-    rho_air,Cd,Af,v_ach(i),veh_mass,timestep,Crr,slope_for_this_step);
-    
-%Compute the distance achieved
-%distance_ach=single(trapz(t,v_ach)/1000);
+    [v_ach(i+1)]=vehicle_fowards_3(F_f_wheelaxle_to_vehicle(i),v_f_wheelaxle_to_vehicle(i),...
+        rho_air,Cd,Af,v_ach(i),veh_mass,timestep,Crr,slope_for_this_step);
+
+    %Compute the distance achieved
+    %distance_ach=single(trapz(t,v_ach)/1000);
 
 end
 

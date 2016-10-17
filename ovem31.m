@@ -121,10 +121,8 @@ top_gear_ratio = T(3);
 final_drive_ratio = T(4);
 top_gear_number = T(2);
 peak_ice_T_2 = EP(2);                   % engine torque
-peak_ice_w_2 = 9000;
+peak_ice_w_2 = 9000;                    % engine angular speed
 max_P = EP(3);                          % engine power
-
-% WHAT IS w?? Watts?
 
 w_at_peak_T = single([2800 4200 4250 2000 2100 1700 3450 2000 2300]);
 
@@ -141,7 +139,6 @@ motor_in_or_out_of_wheel =0;
 elec_brake_state=0;
 gearbox_type= 1;
 
-
 % Actual performance
 CC = [8340 11995 17795 25920 25770 58440 23615 22880 21465];
 cap_cost = CC(SPD(1)-1);
@@ -157,7 +154,7 @@ simulate = [1 1 1 1 1 1 1 1 1];
 wheelbase =  2.38; 
 h=0.3;
 fuel_tank = [35 0 0 0 0 0 0 0 0];
-OIC = [23 23 23 27 27 27 27 27 27];
+OIC = [23 23 23 27 27 27 27 27 27];   %?????
 old_ice_cost = max_P.*OIC(SPD(1)-1)*.596; %Assume turbo pisi = turbo dici
 
 %% Unit conversion

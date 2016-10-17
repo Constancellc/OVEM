@@ -76,22 +76,22 @@ if powertrain_type == 1
     
     batt_cap = mj_die_km * range_km;
     
-[max_ice_kw,fuel_motor,motor_f_eff,~,v_ach,~,batt_kwh,~,... 
-    ~,~,~,final_veh_mass]=level_3_ev2(powertrain_type,v_req,t,timestep,...
-   drive_cycle_length,slope,Cd,Af,rho_air,veh_mass,Crr,total_driven_wheelaxle_inertia,motor_in_or_out_of_wheel,...
-   number_of_driven_wheels,final_drive_ratio,tire_radius,number_of_motors,front_or_rear_wheel_drive,dynamic_braking,...
-   wheelbase,L1,L2,h,distance_req,distance_req_alt,fuel_tank,batt_cap,overall_mass_fac,batt_V,scaling_factor,...
-   motor_selection,ESS1_selection,ESS2_selection,ele_map,regen_var);
+    [max_ice_kw,fuel_motor,motor_f_eff,~,v_ach,~,batt_kwh,~,... 
+        ~,~,~,final_veh_mass]=level_3_ev2(powertrain_type,v_req,t,timestep,...
+       drive_cycle_length,slope,Cd,Af,rho_air,veh_mass,Crr,total_driven_wheelaxle_inertia,motor_in_or_out_of_wheel,...
+       number_of_driven_wheels,final_drive_ratio,tire_radius,number_of_motors,front_or_rear_wheel_drive,dynamic_braking,...
+       wheelbase,L1,L2,h,distance_req,distance_req_alt,fuel_tank,batt_cap,overall_mass_fac,batt_V,scaling_factor,...
+       motor_selection,ESS1_selection,ESS2_selection,ele_map,regen_var);
 
-max_ice_P = 0;
-fuel_ice = 0;
-med_ice_eff = 0;
-med_motor_eff = median(motor_f_eff);
-max_motor_P = max_ice_kw;
-%dist_km = range;
-fuel_fc = 0;
-med_fc_eff = 0;
-max_fc_P = 0;
+    max_ice_P = 0;
+    fuel_ice = 0;
+    med_ice_eff = 0;
+    med_motor_eff = median(motor_f_eff);
+    max_motor_P = max_ice_kw;
+    %dist_km = range;
+    fuel_fc = 0;
+    med_fc_eff = 0;
+    max_fc_P = 0;
 
 %%%%%%%%%%%%%%%%%%
 %% Series HEV
@@ -101,25 +101,25 @@ elseif powertrain_type == 2
         
     batt_cap = mj_die_km * range_km;
 
-[max_ice_kw,max_motor_kw,fuel_ice,fuel_motor,motor_eff_f,ice_eff_f,~,v_ach,~,~,batt_kwh]=...
-    level_3_s_hev(powertrain_type,v_req,t,timestep,drive_cycle_length,slope,Cd,Af,rho_air,...
-    veh_mass,Crr,total_driven_wheelaxle_inertia,motor_in_or_out_of_wheel,number_of_driven_wheels,tire_radius,...
-    gearbox_type,final_drive_ratio,number_of_motors,front_or_rear_wheel_drive,dynamic_braking,...
-    wheelbase,L1,L2,h,distance_req,distance_req_alt,batt_cap,overall_mass_fac,batt_V,si_map,...
-    ele_map,max_P,peak_ice_T,scaling_factor,motor_selection,ESS1_selection,ESS2_selection);
+    [max_ice_kw,max_motor_kw,fuel_ice,fuel_motor,motor_eff_f,ice_eff_f,~,v_ach,~,~,batt_kwh]=...
+        level_3_s_hev(powertrain_type,v_req,t,timestep,drive_cycle_length,slope,Cd,Af,rho_air,...
+        veh_mass,Crr,total_driven_wheelaxle_inertia,motor_in_or_out_of_wheel,number_of_driven_wheels,tire_radius,...
+        gearbox_type,final_drive_ratio,number_of_motors,front_or_rear_wheel_drive,dynamic_braking,...
+        wheelbase,L1,L2,h,distance_req,distance_req_alt,batt_cap,overall_mass_fac,batt_V,si_map,...
+        ele_map,max_P,peak_ice_T,scaling_factor,motor_selection,ESS1_selection,ESS2_selection);
 
-max_ice_P = max_ice_kw;
-%fuel_ice = fuel_ice;
-med_ice_eff = median(ice_eff_f);
-med_motor_eff = median(motor_eff_f);
-max_motor_P = max_motor_kw;
-%fuel_motor = fuel_motor;
-%dist_km = range;
+    max_ice_P = max_ice_kw;
+    %fuel_ice = fuel_ice;
+    med_ice_eff = median(ice_eff_f);
+    med_motor_eff = median(motor_eff_f);
+    max_motor_P = max_motor_kw;
+    %fuel_motor = fuel_motor;
+    %dist_km = range;
 
-fuel_fc = 0;
-med_fc_eff = 0;
-max_fc_P = 0;
-final_veh_mass= 0;
+    fuel_fc = 0;
+    med_fc_eff = 0;
+    max_fc_P = 0;
+    final_veh_mass= 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% PISI Parallel & Dual
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

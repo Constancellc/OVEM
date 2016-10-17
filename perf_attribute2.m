@@ -20,6 +20,7 @@ fuel_motor;
 % fuel_l_diesel = (fuel_ice/38.6);
 % fuel_gal_diesel = fuel_l_diesel/4.54609;
 % fuel_gal_petrol = fuel_l_petrol/4.54609;
+
 %% Function
 if powertrain_type ==1  % EV - only electricity used, cost penalty from battery pack 
 
