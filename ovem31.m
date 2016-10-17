@@ -301,7 +301,6 @@ else SPD(2)=4;
     ra = .01; 
 end
 
-
 ce = ghg_per_km;%(SPD(1),SPD(2));
 fc_wtw = mj_wtw;%(SPD(1),SPD(2));%wtw
 ce_wtw = ghg_wtw;%(SPD(1),SPD(2)); %wtw

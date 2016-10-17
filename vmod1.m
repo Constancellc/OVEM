@@ -311,8 +311,8 @@ else
     %para1 justins software
 end
 
-%ok=OVEM31(1);
 if OVEM31(1)==1
+    % Display the result fields
     set(handles.pp,'visible','on')
     set(handles.pp1,'visible','on')
     set(handles.pp2,'visible','on')
@@ -339,15 +339,18 @@ if OVEM31(1)==1
     set(handles.powertrain2,'visible','on')
     set(handles.drivecycle1,'visible','on')
     set(handles.drivecycle2,'visible','on')
+    
     if (SPD(2)==3||SPD(2)==4);
-    set(handles.bc,'visible','on')
-    set(handles.bc1,'visible','on')
-    set(handles.bc2,'visible','on')
+        set(handles.bc,'visible','on')
+        set(handles.bc1,'visible','on')
+        set(handles.bc2,'visible','on')
     elseif (SPD(2)==2);
-    set(handles.bc,'visible','off')
-    set(handles.bc1,'visible','off')
-    set(handles.bc2,'visible','off')
+        set(handles.bc,'visible','off')
+        set(handles.bc1,'visible','off')
+        set(handles.bc2,'visible','off')
     end
+    
+    % And fill them with the returned values
     set(handles.pp1,'string',OUT(1))
     set(handles.fc1,'string',OUT(2))
     set(handles.ce1,'string',OUT(3))

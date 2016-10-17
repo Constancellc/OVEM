@@ -285,18 +285,17 @@ drivecycle = {'NEDC' 'Artemis' 'FUDS' 'NYCC' 'US06' 'US HWFET' 'US EPA'};
 
 sp=SET(1);
 
-if (((SPD(1)==1) || (SPD(2)==1) || (SPD(3)==1)) && (SET(1)==0));
-    mcat=msgbox('please set values for SMMT Categories, Power Train and Drivecycle','Choose Categories');
+if (((SPD(1)==1) || (SPD(2)==1) || (SPD(3)==1)) || (SET(1)==0))
+    mcat=msgbox('please set all parameters first');
        set( mcat, 'color', [ 0.9 0.9 .9 ] );
-elseif ((S>1) && (P>1) && (D>1) && (sp==0));
-    mset=msgbox('please set the vehicle parameters','Set Parameters');
-       set( mset, 'color', [ 0.9 0.9 .9 ] );
-elseif ((S>1) && (P>1) && (D>1) && (sp==1));
+else
     h = waitbar(0,'Calculating. Please wait...');
     steps = 100;
+    
     ovem31();
+    
     for step = 1:steps
-    waitbar(step / steps);
+        waitbar(step / steps);
     end
     close(h);
 
@@ -312,8 +311,8 @@ elseif ((S>1) && (P>1) && (D>1) && (sp==1));
     %para1 justins software
 end
 
-%ok=OVEM31(1);
 if OVEM31(1)==1
+    % Display the o
     set(handles.pp,'visible','on')
     set(handles.pp1,'visible','on')
     set(handles.pp2,'visible','on')
