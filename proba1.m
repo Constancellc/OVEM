@@ -299,6 +299,46 @@ policy(handles,8)
 
 %slider, value, years for PAMD
 
+function manual_value(property,limit)
+value = get(property,'String'); 
+value = str2double(value); 
+
+if (isempty(value) || value < 0 || value > limit)
+    set(property,'Value',0);
+    set(property,'String','0');
+    txt = sprintf('Please choose a value below %d',limit);
+    m=msgbox(txt, 'Error');
+    set( m, 'color', [ 0.9 0.9 .9 ] )
+else
+    set(property,'Value',value);
+end
+
+function policy_year(in,out,final)
+yi = get(in,'string');
+yi = str2double(yi);
+yo = get(out,'string');
+yo = str2double(yo);
+
+if nargin < 3
+    final = 0;
+end
+
+if(yo<yi)
+    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
+    set( my, 'color', [ 0.9 0.9 .9 ] )
+    set(in,'string','2010');
+
+elseif(yi<2010)
+    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
+    set( my, 'color', [ 0.9 0.9 .9 ] )
+    set(in,'string','2010');
+end
+
+if (final~=0) && (yo>final)
+    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
+    set( my, 'color', [ 0.9 0.9 .9 ] )
+    set(out,'string',final)
+end
 
 function sevsl_Callback(hObject, eventdata, handles)
 sl = get(handles.sevsl,'Value');%obtains the slider value from the slider component
@@ -314,16 +354,8 @@ end
 
 
 function sevvl_Callback(hObject, eventdata, handles)
-vl = get(handles.sevvl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
+manual_value(handles.sevsl,1000)
 
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.sevsl,'Value',0);
-    set(handles.sevvl,'String','0');
-else
-    set(handles.sevsl,'Value',vl1);
-end
 
 function sevvl_CreateFcn(hObject, eventdata, handles)
 
@@ -335,21 +367,7 @@ end
 
 
 function sevyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.sevyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.sevyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-         set(handles.sevyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.sevyi,'string','2010');
-end
+policy_year(handles.sevyi,handles.sevyo)
 
 function sevyi_CreateFcn(hObject, eventdata, handles)
 
@@ -361,21 +379,7 @@ end
 
 
 function sevyo_Callback(hObject, eventdata, handles)
-syi1 = get(handles.sevyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.sevyo,'string');
-syo = str2double(syo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-elseif(syo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.sevyo,'string',cy)
-end
+policy_year(handles.sevyi,handles.sevyo,handles.finalyear)
 
 function sevyo_CreateFcn(hObject, eventdata, handles)
 
@@ -403,16 +407,8 @@ end
 
 
 function hyvl_Callback(hObject, eventdata, handles)
-vl = get(handles.hyvl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
+manual_value(handles.hyvl,1000)
 
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.hysl,'Value',0);
-    set(handles.hyvl,'String','0');
-else
-    set(handles.hysl,'Value',vl1);
-end
 
 function hyvl_CreateFcn(hObject, eventdata, handles)
 
@@ -424,21 +420,7 @@ end
 
 
 function hyyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.hyyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.hyyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.hyyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.hyyi,'string','2010');
-end
+policy_year(handles.hyyi,handles.hyyo)
         
 
 function hyyi_CreateFcn(hObject, eventdata, handles)
@@ -451,22 +433,8 @@ end
 
 
 function hyyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.hyyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.hyyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
-   
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.hyyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.hyyo,'string',cy);
-end
+policy_year(handles.hyyi,handles.hyyo,handles.finalyear)
+
 
 function hyyo_CreateFcn(hObject, eventdata, handles)
 
@@ -475,10 +443,6 @@ function hyyo_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-
-
 
 
 function phsl_Callback(hObject, eventdata, handles)
@@ -495,16 +459,8 @@ end
 
 
 function phvl_Callback(hObject, eventdata, handles)
-vl = get(handles.phvl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
+manual_value(handles.phvl,1000)
 
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.phsl,'Value',0);
-    set(handles.phvl,'String','0');
-else
-    set(handles.phsl,'Value',vl1);
-end
 
 function phvl_CreateFcn(hObject, eventdata, handles)
 
@@ -516,22 +472,8 @@ end
 
 
 function phyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.phyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.phyo,'string');
-syo = str2double(syo1);
+policy_year(handles.phyi,handles.phyo)
 
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.phyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.phyi,'string','2010');
-end
-        
 
 function phyi_CreateFcn(hObject, eventdata, handles)
 
@@ -543,23 +485,8 @@ end
 
 
 function phyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.phyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.phyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
+policy_year(handles.phyi,handles.phyo,handles.finalyear)
 
-
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.phyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.phyo,'string',cy);
-end
 
 function phyo_CreateFcn(hObject, eventdata, handles)
 
@@ -568,10 +495,6 @@ function phyo_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-
-
 
 function fcsl_Callback(hObject, eventdata, handles)
 sl = get(handles.fcsl,'Value');%obtains the slider value from the slider component
@@ -587,16 +510,7 @@ end
 
 
 function fcvl_Callback(hObject, eventdata, handles)
-vl = get(handles.fcvl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
-
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.fcsl,'Value',0);
-    set(handles.fcvl,'String','0');
-else
-    set(handles.fcsl,'Value',vl1);
-end
+manual_value(handles.fcvl,1000)
 
 function fcvl_CreateFcn(hObject, eventdata, handles)
 
@@ -608,22 +522,7 @@ end
 
 
 function fcyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.fcyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.fcyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.fcyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.fcyi,'string','2010');
-end
-        
+policy_year(handles.fcyi,handles.fcyo)
 
 function fcyi_CreateFcn(hObject, eventdata, handles)
 
@@ -635,22 +534,7 @@ end
 
 
 function fcyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.fcyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.fcyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
-
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.fcyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.fcyo,'string',cy);
-end
+policy_year(handles.fcyi,handles.fcyo,handles.finalyear)
 
 function fcyo_CreateFcn(hObject, eventdata, handles)
 
@@ -680,16 +564,7 @@ end
 
 
 function pvl_Callback(hObject, eventdata, handles)
-vl = get(handles.pvl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
-
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.psl,'Value',0);
-    set(handles.pvl,'String','0');
-else
-    set(handles.psl,'Value',vl1);
-end
+manual_value(handles.pvl,1000)
 
 function pvl_CreateFcn(hObject, eventdata, handles)
 
@@ -699,23 +574,8 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 function pyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.pyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.pyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.pyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.pyi,'string','2010');
-end
+policy_year(handles.pyi,handles.pyo)
 
 function pyi_CreateFcn(hObject, eventdata, handles)
 
@@ -725,24 +585,9 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 function pyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.pyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.pyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
+policy_year(handles.pyi,handles.pyo,handles.finalyear)
 
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.pyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.pyo,'string',cy);
-end
 
 function pyo_CreateFcn(hObject, eventdata, handles)
 
@@ -751,9 +596,6 @@ function pyo_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-
 
 function dsl_Callback(hObject, eventdata, handles)
 sl = get(handles.dsl,'Value');%obtains the slider value from the slider component
@@ -768,79 +610,34 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
 end
 
 function dvl_Callback(hObject, eventdata, handles)
-vl = get(handles.dvl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
-
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.dsl,'Value',0);
-    set(handles.dvl,'String','0');
-else
-    set(handles.dsl,'Value',vl1);
-end
+manual_value(handles.dvl,1000)
 
 function dvl_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 function dyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.dyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.dyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.dyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.dyi,'string','2010');
-end
+policy_year(handles.dyi,handles.dyo)
 
 function dyi_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 function dyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.dyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.dyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
-
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.dyo,'string',cy);
-        
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.dyo,'string',cy);
-end
+policy_year(handles.dyi,handles.dyo)
 
 function dyo_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 function esl_Callback(hObject, eventdata, handles)
 sl = get(handles.esl,'Value');%obtains the slider value from the slider component
@@ -848,88 +645,40 @@ set(handles.evl,'String', num2str(sl));%puts the slider value into the edit text
 guidata(hObject, handles);% Update handles structure
 
 function esl_CreateFcn(hObject, eventdata, handles)
-
 % Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
 
-
 function evl_Callback(hObject, eventdata, handles)
-vl = get(handles.evl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
-
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.esl,'Value',0);
-    set(handles.evl,'String','0');
-else
-    set(handles.esl,'Value',vl1);
-end
+manual_value(handles.evl,1000)
 
 function evl_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 function eyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.eyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.eyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.eyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.eyi,'string','2010');
-end
+policy_year(handles.eyi,handles.eyo)
 
 function eyi_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 function eyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.eyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.eyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
-
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-         set(handles.eyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.eyo,'string',cy);
-end
+policy_year(handles.eyi,handles.eyo,handles.finalyear)
 
 function eyo_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-
 
 function hsl_Callback(hObject, eventdata, handles)
 sl = get(handles.hsl,'Value');%obtains the slider value from the slider component
@@ -937,80 +686,35 @@ set(handles.hvl,'String', num2str(sl));%puts the slider value into the edit text
 guidata(hObject, handles);% Update handles structure
 
 function hsl_CreateFcn(hObject, eventdata, handles)
-
 % Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
 
-
 function hvl_Callback(hObject, eventdata, handles)
-vl = get(handles.hvl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
-
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.hsl,'Value',0);
-    set(handles.hvl,'String','0');
-else
-    set(handles.hsl,'Value',vl1);
-end
+manual_value(handles.hvl,1000)
 
 function hvl_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 function hyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.hyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.hyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.hyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.hyi,'string','2010');
-end
+policy_year(handles.hyi,handles.hyo)
 
 function hyi_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
 function hyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.hyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.hyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
-
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.hyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.hyo,'string',cy);
-end
+policy_year(handles.hyi,handles.hyo,handles.finalyear)
 
 function hyo_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -1020,249 +724,75 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %other factors
 
+function others(handles,i)
+% i is an index relating to the check box.
 
+% This matrix contains the locations of the properties relevant to each
+% call, each row representing a different option
+properties = [handles.ncegsl, handles.ncegvl, handles.ncegyi,...
+    handles.ncegyo, handles.text84;...
+    handles.ptisl, handles.ptivl, handles.ptiyi, handles.ptiyo,...
+    handles.text85;...
+    handles.dtisl, handles.dtivl, handles.dtiyi, handles.dtiyo,...
+    handles.text86;...
+    handles.htisl, handles.htivl, handles.htiyi, handles.htiyo,...
+    handles.text87;...
+    handles.pihtisl, handles.pihtivl, handles.pihtiyi, handles.pihtiyo,...
+    handles.text88;...
+    handles.etisl, handles.etivl, handles.etiyi, handles.etiyo,...
+    handles.text89;...
+    handles.fctisl, handles.fctivl, handles.fctiyi, handles.fctiyo,...
+    handles.text90];
+   
+% And this stores the values in question
+a=[get(handles.nceg,'value'); get(handles.pti,'value');...
+    get(handles.dti,'value'); get(handles.hti,'value');...
+    get(handles.pihti,'value'); get(handles.eti,'value');...
+    get(handles.fcti,'value')];
+   
+if a(i)==1
+    for j = 1:5
+        set(properties(i,j),'visible','on');
+    end
+elseif a(i)==0
+    for j = 1:5
+        set(properties(i,j),'visible','off');
+    end
+end
+
+set(properties(i,1),'value',0);
+set(properties(i,2),'string','0');
+set(properties(i,3),'string','2010');
+set(properties(i,4),'string','2011');
+
+if sum(a) > 0
+    set(handles.yi,'visible','on')
+    set(handles.yo,'visible','on')
+else
+    set(handles.yi,'visible','off')
+    set(handles.yo,'visible','off')
+end
 
 function nceg_Callback(hObject, eventdata, handles)
-a1=get(handles.nceg,'value');
-a2=get(handles.pti,'value');
-a3=get(handles.dti,'value');
-a4=get(handles.hti,'value');
-a5=get(handles.pihti,'value');
-a6=get(handles.eti,'value');
-a7=get(handles.fcti,'value');
-if a1==1
-    set(handles.ncegsl,'visible','on');
-    set(handles.ncegvl,'visible','on');
-    set(handles.ncegyi,'visible','on');
-    set(handles.ncegyo,'visible','on');
-    set(handles.text84,'visible','on');
-elseif a1==0
-    set(handles.ncegsl,'visible','off');
-    set(handles.ncegvl,'visible','off');
-    set(handles.ncegyi,'visible','off');
-    set(handles.ncegyo,'visible','off');
-    set(handles.text84,'visible','off');
-    set(handles.ncegsl,'value',0);
-    set(handles.ncegvl,'string','0');
-    set(handles.ncegyi,'string','2010');
-    set(handles.ncegyo,'string','2011');
-end
-
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1)
-    set(handles.yiof,'visible','on')
-    set(handles.yoof,'visible','on')
-else
-    set(handles.yiof,'visible','off')
-    set(handles.yoof,'visible','off')
-end
-
+others(handles,1)
     
 function pti_Callback(hObject, eventdata, handles)
-a1=get(handles.nceg,'value');
-a2=get(handles.pti,'value');
-a3=get(handles.dti,'value');
-a4=get(handles.hti,'value');
-a5=get(handles.pihti,'value');
-a6=get(handles.eti,'value');
-a7=get(handles.fcti,'value');
-if a2==1
-    set(handles.ptisl,'visible','on');
-    set(handles.ptivl,'visible','on');
-    set(handles.ptiyi,'visible','on');
-    set(handles.ptiyo,'visible','on');
-    set(handles.text85,'visible','on');
-elseif a2==0
-    set(handles.ptisl,'visible','off');
-    set(handles.ptivl,'visible','off');
-    set(handles.ptiyi,'visible','off');
-    set(handles.ptiyo,'visible','off');
-    set(handles.text85,'visible','off');
-    set(handles.ptisl,'value',0);
-    set(handles.ptivl,'string','0');
-    set(handles.ptiyi,'string','2010');
-    set(handles.ptiyo,'string','2011');
-end
-
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1)
-    set(handles.yiof,'visible','on')
-    set(handles.yoof,'visible','on')
-else
-    set(handles.yiof,'visible','off')
-    set(handles.yoof,'visible','off')
-end
+others(handles,2)
 
 function dti_Callback(hObject, eventdata, handles)
-a1=get(handles.nceg,'value');
-a2=get(handles.pti,'value');
-a3=get(handles.dti,'value');
-a4=get(handles.hti,'value');
-a5=get(handles.pihti,'value');
-a6=get(handles.eti,'value');
-a7=get(handles.fcti,'value');
-if a3==1
-    set(handles.dtisl,'visible','on');
-    set(handles.dtivl,'visible','on');
-    set(handles.dtiyi,'visible','on');
-    set(handles.dtiyo,'visible','on');
-    set(handles.text86,'visible','on');
-elseif a3==0
-    set(handles.dtisl,'visible','off');
-    set(handles.dtivl,'visible','off');
-    set(handles.dtiyi,'visible','off');
-    set(handles.dtiyo,'visible','off');
-    set(handles.text86,'visible','off');
-    set(handles.dtisl,'value',0);
-    set(handles.dtivl,'string','0');
-    set(handles.dtiyi,'string','2010');
-    set(handles.dtiyo,'string','2011');
-end
-
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1)
-    set(handles.yiof,'visible','on')
-    set(handles.yoof,'visible','on')
-else
-    set(handles.yiof,'visible','off')
-    set(handles.yoof,'visible','off')
-end
-
+others(handles,3)
 
 function hti_Callback(hObject, eventdata, handles)
-a1=get(handles.nceg,'value');
-a2=get(handles.pti,'value');
-a3=get(handles.dti,'value');
-a4=get(handles.hti,'value');
-a5=get(handles.pihti,'value');
-a6=get(handles.eti,'value');
-a7=get(handles.fcti,'value');
-if a4==1
-    set(handles.htisl,'visible','on');
-    set(handles.htivl,'visible','on');
-    set(handles.htiyi,'visible','on');
-    set(handles.htiyo,'visible','on');
-    set(handles.text87,'visible','on');
-elseif a4==0
-    set(handles.htisl,'visible','off');
-    set(handles.htivl,'visible','off');
-    set(handles.htiyi,'visible','off');
-    set(handles.htiyo,'visible','off');
-    set(handles.text87,'visible','off');
-    set(handles.htisl,'value',0);
-    set(handles.htivl,'string','0');
-    set(handles.htiyi,'string','2010');
-    set(handles.htiyo,'string','2011');
-end
-
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1)
-    set(handles.yiof,'visible','on')
-    set(handles.yoof,'visible','on')
-else
-    set(handles.yiof,'visible','off')
-    set(handles.yoof,'visible','off')
-end
+others(handles,4)
 
 function pihti_Callback(hObject, eventdata, handles)
-a1=get(handles.nceg,'value');
-a2=get(handles.pti,'value');
-a3=get(handles.dti,'value');
-a4=get(handles.hti,'value');
-a5=get(handles.pihti,'value');
-a6=get(handles.eti,'value');
-a7=get(handles.fcti,'value');
-if a5==1
-    set(handles.pihtisl,'visible','on');
-    set(handles.pihtivl,'visible','on');
-    set(handles.pihtiyi,'visible','on');
-    set(handles.pihtiyo,'visible','on');
-    set(handles.text88,'visible','on');
-elseif a5==0
-    set(handles.pihtisl,'visible','off');
-    set(handles.pihtivl,'visible','off');
-    set(handles.pihtiyi,'visible','off');
-    set(handles.pihtiyo,'visible','off');
-    set(handles.text88,'visible','off');
-    set(handles.pihtisl,'value',0);
-    set(handles.pihtivl,'string','0');
-    set(handles.pihtiyi,'string','2010');
-    set(handles.pihtiyo,'string','2011');
-end
-
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1)
-    set(handles.yiof,'visible','on')
-    set(handles.yoof,'visible','on')
-else
-    set(handles.yiof,'visible','off')
-    set(handles.yoof,'visible','off')
-end
+others(handles,5)
 
 function eti_Callback(hObject, eventdata, handles)
-a1=get(handles.nceg,'value');
-a2=get(handles.pti,'value');
-a3=get(handles.dti,'value');
-a4=get(handles.hti,'value');
-a5=get(handles.pihti,'value');
-a6=get(handles.eti,'value');
-a7=get(handles.fcti,'value');
-if a6==1
-    set(handles.etisl,'visible','on');
-    set(handles.etivl,'visible','on');
-    set(handles.etiyi,'visible','on');
-    set(handles.etiyo,'visible','on');
-    set(handles.text89,'visible','on');
-elseif a6==0
-    set(handles.etisl,'visible','off');
-    set(handles.etivl,'visible','off');
-    set(handles.etiyi,'visible','off');
-    set(handles.etiyo,'visible','off');
-    set(handles.text89,'visible','off');
-    set(handles.etisl,'value',0);
-    set(handles.etivl,'string','0');
-    set(handles.etiyi,'string','2010');
-    set(handles.etiyo,'string','2011');
-end
-
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1)
-    set(handles.yiof,'visible','on')
-    set(handles.yoof,'visible','on')
-else
-    set(handles.yiof,'visible','off')
-    set(handles.yoof,'visible','off')
-end
+others(handles,6)
 
 function fcti_Callback(hObject, eventdata, handles)
-a1=get(handles.nceg,'value');
-a2=get(handles.pti,'value');
-a3=get(handles.dti,'value');
-a4=get(handles.hti,'value');
-a5=get(handles.pihti,'value');
-a6=get(handles.eti,'value');
-a7=get(handles.fcti,'value');
-if a7==1
-    set(handles.fctisl,'visible','on');
-    set(handles.fctivl,'visible','on');
-    set(handles.fctiyi,'visible','on');
-    set(handles.fctiyo,'visible','on');
-    set(handles.text90,'visible','on');
-elseif a7==0
-    set(handles.fctisl,'visible','off');
-    set(handles.fctivl,'visible','off');
-    set(handles.fctiyi,'visible','off');
-    set(handles.fctiyo,'visible','off');
-    set(handles.text90,'visible','off');
-    set(handles.fctisl,'value',0);
-    set(handles.fctivl,'string','0');
-    set(handles.fctiyi,'string','2010');
-    set(handles.fctiyo,'string','2011');
-end
-
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1)
-    set(handles.yiof,'visible','on')
-    set(handles.yoof,'visible','on')
-else
-    set(handles.yiof,'visible','off')
-    set(handles.yoof,'visible','off')
-end
-
-
+others(handles,7)
 
 %sliders, values, years for OFAMD
 
@@ -1281,16 +811,7 @@ end
 
 
 function ncegvl_Callback(hObject, eventdata, handles)
-vl = get(handles.ncegvl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
-
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.ncegsl,'Value',0);
-    set(handles.ncegvl,'String','0');
-else
-    set(handles.ncegsl,'Value',vl1);
-end
+manual_value(handles.ncegvl,100)
 
 function ncegvl_CreateFcn(hObject, eventdata, handles)
 
@@ -1302,21 +823,8 @@ end
 
 
 function ncegyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.ncegyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.ncegyo,'string');
-syo = str2double(syo1);
+policy_year(handles.ncegyi,handles.ncegyo)
 
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.ncegyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.ncegyi,'string','2010');
-end
 
 function ncegyi_CreateFcn(hObject, eventdata, handles)
 
@@ -1328,22 +836,7 @@ end
 
 
 function ncegyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.ncegyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.ncegyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
-
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.ncegyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.ncegyo,'string',cy);
-end
+policy_year(handles.ncegyi,handles.ncegyo,handles.finalyear)
 
 function ncegyo_CreateFcn(hObject, eventdata, handles)
 
@@ -1360,7 +853,6 @@ set(handles.ptivl,'String', num2str(sl));%puts the slider value into the edit te
 guidata(hObject, handles);% Update handles structure
 
 function ptisl_CreateFcn(hObject, eventdata, handles)
-
 % Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
@@ -1432,19 +924,8 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
 
-
-
 function ptivl_Callback(hObject, eventdata, handles)
-vl = get(handles.ptivl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
-
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.ptisl,'Value',0);
-    set(handles.ptivl,'String','0');
-else
-    set(handles.ptisl,'Value',vl1);
-end
+manual_value(handles.ptivl,100)
 
 function ptivl_CreateFcn(hObject, eventdata, handles)
 
@@ -1456,21 +937,8 @@ end
 
 
 function ptiyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.ptiyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.ptiyo,'string');
-syo = str2double(syo1);
+policy_year(handles.ptiyi,handles.ptiyo)
 
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.ptiyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.ptiyi,'string','2010');
-end
 
 function ptiyi_CreateFcn(hObject, eventdata, handles)
 
@@ -1482,22 +950,8 @@ end
 
 
 function ptiyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.ptiyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.ptiyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
+policy_year(handles.ptiyi,handles.ptiyo,handles.finalyear)
 
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.ptiyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.ptiyo,'string',cy);
-end
 
 function ptiyo_CreateFcn(hObject, eventdata, handles)
 
@@ -1509,16 +963,7 @@ end
 
 
 function dtivl_Callback(hObject, eventdata, handles)
-vl = get(handles.dtivl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
-
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.dtisl,'Value',0);
-    set(handles.dtivl,'String','0');
-else
-    set(handles.dtisl,'Value',vl1);
-end
+manual_value(handles.dtivl,100)
 
 function dtivl_CreateFcn(hObject, eventdata, handles)
 
@@ -1530,21 +975,7 @@ end
 
 
 function dtiyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.dtiyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.dtiyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.dtiyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.dtiyi,'string','2010');
-end
+policy_year(handles.dtiyi,handles.dtiyo)
 
 function dtiyi_CreateFcn(hObject, eventdata, handles)
 
@@ -1556,22 +987,7 @@ end
 
 
 function dtiyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.dtiyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.dtiyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
-
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.dtiyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.dtiyo,'string',cy);
-end
+policy_year(handles.dtiyi,handles.dtiyo,handles.finalyear)
 
 function dtiyo_CreateFcn(hObject, eventdata, handles)
 
@@ -1583,16 +999,7 @@ end
 
 
 function htivl_Callback(hObject, eventdata, handles)
-vl = get(handles.htivl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
-
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.htisl,'Value',0);
-    set(handles.htivl,'String','0');
-else
-    set(handles.htisl,'Value',vl1);
-end
+manual_value(handles.htivl,100)
 
 function htivl_CreateFcn(hObject, eventdata, handles)
 
@@ -1604,21 +1011,7 @@ end
 
 
 function htiyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.htiyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.htiyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-         set(handles.htiyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.htiyi,'string','2010');
-end
+policy_year(handles.htiyi,handles.htiyo)
 
 function htiyi_CreateFcn(hObject, eventdata, handles)
 
@@ -1630,22 +1023,7 @@ end
 
 
 function htiyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.htiyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.htiyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
-
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.htiyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.htiyo,'string',cy);
-end
+policy_year(handles.htiyi,handles.htiyo,handles.finalyear)
 
 function htiyo_CreateFcn(hObject, eventdata, handles)
 
@@ -1657,16 +1035,7 @@ end
 
 
 function pihtivl_Callback(hObject, eventdata, handles)
-vl = get(handles.pihtivl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
-
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.pihtisl,'Value',0);
-    set(handles.pihtivl,'String','0');
-else
-    set(handles.pihtisl,'Value',vl1);
-end
+manual_value(handles.pihtivl,100)
 
 function pihtivl_CreateFcn(hObject, eventdata, handles)
 
@@ -1678,24 +1047,9 @@ end
 
 
 function pihtiyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.pihtiyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.pihtiyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.pihtiyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.pihtiyi,'string','2010');
-end
+policy_year(handles.pihtiyi,handles.pihtiyo)
 
 function pihtiyi_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -1704,22 +1058,7 @@ end
 
 
 function pihtiyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.pihtiyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.pihtiyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
-
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.pihtiyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.pihtiyo,'string',cy);
-end
+policy_year(handles.pihtiyi,handles.pihtiyo,handles.finalyear)
 
 function pihtiyo_CreateFcn(hObject, eventdata, handles)
 
@@ -1731,16 +1070,8 @@ end
 
 
 function etivl_Callback(hObject, eventdata, handles)
-vl = get(handles.etivl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
+manual_value(handles.etivl,100)
 
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.etisl,'Value',0);
-    set(handles.etivl,'String','0');
-else
-    set(handles.etisl,'Value',vl1);
-end
 
 function etivl_CreateFcn(hObject, eventdata, handles)
 
@@ -1752,21 +1083,7 @@ end
 
 
 function etiyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.etiyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.etiyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-         set(handles.etiyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.etiyi,'string','2010');
-end
+policy_year(handles.etiyi,handles.etiyo)
 
 function etiyi_CreateFcn(hObject, eventdata, handles)
 
@@ -1778,22 +1095,7 @@ end
 
 
 function etiyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.etiyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.etiyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
-
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.etiyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.etiyo,'string',cy);
-end
+policy_year(handles.etiyi,handles.etiyo,handles.finalyear)
 
 function etiyo_CreateFcn(hObject, eventdata, handles)
 
@@ -1805,16 +1107,7 @@ end
 
 
 function fctivl_Callback(hObject, eventdata, handles)
-vl = get(handles.fctivl,'String');%get the string for the editText component
-vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
-
-
-if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
-    set(handles.fctisl,'Value',0);
-    set(handles.fctivl,'String','0');
-else
-    set(handles.fctisl,'Value',vl1);
-end
+manual_value(handles.fctivl,100)
 
 function fctivl_CreateFcn(hObject, eventdata, handles)
 
@@ -1826,21 +1119,7 @@ end
 
 
 function fctiyi_Callback(hObject, eventdata, handles)
-syi1 = get(handles.fctiyi,'string');
-syi = str2double(syi1);
-syo1 = get(handles.fctiyo,'string');
-syo = str2double(syo1);
-
-if(syo<syi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.fctiyi,'string','2010');
-
-elseif(syi<2010)
-    my=msgbox('The policy year in cannot be smaller than 2010', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] );
-        set(handles.fctiyi,'string','2010');
-end
+policy_year(handles.fctiyi,handles.fctiyo)
 
 function fctiyi_CreateFcn(hObject, eventdata, handles)
 
@@ -1852,22 +1131,9 @@ end
 
 
 function fctiyo_Callback(hObject, eventdata, handles)
-pyi1 = get(handles.fctiyi,'string');
-pyi = str2double(pyi1);
-pyo1 = get(handles.fctiyo,'string');
-pyo = str2double(pyo1);
-cy1 = get(handles.finalyear,'string');
-cy = str2double(cy1);
+policy_year(handles.fctiyi,handles.fctiyo,handles.finalyear)
 
-if(pyo<pyi)
-    my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.fctiyo,'string',cy);
-elseif(pyo>cy)
-    my=msgbox('The policy year out cannot be greater than the final simulation year', 'Error Policy Year');
-        set( my, 'color', [ 0.9 0.9 .9 ] )
-        set(handles.fctiyo,'string',cy);
-end
+
 function fctiyo_CreateFcn(hObject, eventdata, handles)
 
 % Hint: edit controls usually have a white background on Windows.
@@ -1876,10 +1142,8 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 %%%%%%%%%%%%%%%%
 %control buttons
-
 
 function finalyear_Callback(hObject, eventdata, handles)
 
