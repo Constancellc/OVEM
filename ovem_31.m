@@ -84,13 +84,15 @@ gearbox_type= ones(1,9);
 
 
 % Actual performance
-
+% Should i update these?
 cap_cost = [8340 11995 17795 25920 25770 58440 23615 22880 21465];
 
 front_or_rear_wheel_drive = [1 1 1 0 0 0 1 0 1];
 dynamic_braking = zeros(1,9);
 number_of_motors = ones(1,9);
-gear_ratio_vector = [3.545 1.894 1.192 .853 .719 1;
+% Each row is the gear ratio vector of a different. I don't really get why 
+% some of the vehicle types have gear ratio of 1
+gear_ratio_vector = [3.545 1.894 1.192 .853 .719 1; 
                     3.58 1.93 1.28 0.95 0.76 1;
                     1 1 1 1 1 1;
                     5.08 2.804 1.783 1.26 1 .835 ;
@@ -139,6 +141,8 @@ hev_aer*ones(1,9)];
     
 [r,c] = size(powertrain_type);
 total_driven_wheelaxle_inertia = single(zeros(c,r));
+
+% These are just being set to zero. No idea why its been done this way...
 dist_km = total_driven_wheelaxle_inertia;
 max_motor_P = total_driven_wheelaxle_inertia;
 max_ice_P = total_driven_wheelaxle_inertia;
@@ -165,6 +169,7 @@ fc_cost = total_driven_wheelaxle_inertia;
 
 
 range1 = zeros(c,1);
+% These are also set to zero 
 max_ice_kw = range1;
 total_fuel_energy = range1;
 mj_die_km = range1;
@@ -194,11 +199,10 @@ number_of_drive_cycles=1;
 
 regen_var = 1;
 
-
 wait = waitbar(0,'Calculating. Please wait...');
 
 %% OVEM
-for i=1:c%columns    
+for i=1:c                               % for each smmt catergory     
 
     %% Base vehicle efficiency
     total_driven_wheelaxle_inertia(i)=wheel_axle_inertia(motor_in_or_out_of_wheel(i),...
@@ -219,7 +223,7 @@ for i=1:c%columns
     fc_kw(i)= max_ice_kw(i);%*max_di_eff/max_ele_eff;
     e_motor_peak_T(i) = peak_ice_T_2(i);%*max_di_eff/max_ele_eff;
 
-    for j=1:r%rows   
+    for j=1:r                           % for each powertrain   
 
         total_driven_wheelaxle_inertia(i,j)=wheel_axle_inertia(motor_in_or_out_of_wheel(i),...
             number_of_driven_wheels(i),tire_radius(i));

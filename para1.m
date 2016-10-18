@@ -267,6 +267,10 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 function powertrain_plot(handles,a,py,cs)
+% a: ttw / wtw 1-ttw only, 2-wtw only, 3-both
+% py: what we're plotting 1-nothing, 2-mj, 3-ghg, 4-$
+% cs: what we're keeping constant 2-smmt, 3-powertrain
+
 global SSC
 global PWT
 global MJKM
@@ -281,7 +285,7 @@ if py == 1
     set( pchoose, 'color', [ 0.9 0.9 .9 ] )
 
 % Select vector to plot
-elseif py==2    
+elseif py==2                        
     if a==1
         if cs==2
             PLOTX=MJKM(SSC,:);

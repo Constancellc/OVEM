@@ -97,6 +97,42 @@ ovemplus
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %consumer preference
 
+function preferences(handles,i,name)
+% i - index: 1=price, 2=running cost, 3=performance, 4=range, 5=emissions
+% and 6=refuel
+
+p = get(handles.price,'String');                % price
+p=str2double(p);
+rc= get(handles.rcost,'String');                % running cost
+rc=str2double(rc);
+vp = get(handles.perf,'String');                % performance
+vp=str2double(vp);
+r = get(handles.range,'String');                % range
+r=str2double(r);
+e = get(handles.emiss,'String');                % emissions
+e=str2double(e);
+rf = get(handles.refuel,'String');              % refuel
+rf=str2double(rf);
+
+values = [p,rc,vp,r,e,rf];
+n = values(i);
+
+t=20-(p+rc+vp+r+e+rf);                          % total
+t_s=num2str(t);
+
+if  (isempty(n) || n < 0 || n > 20);
+    txt = sprintf('Please choose a value between 0 and 20');
+    m=msgbox(txt,name);
+    set( m, 'color', [ 0.9 0.9 .9 ] )
+elseif t<0
+    m=msgbox('You have exceeded your maximum allocated points','Error Allocated Points');
+    set( m, 'color', [ 0.9 0.9 .9 ] )
+else
+    set(handles.total,'string',t_s); 
+end
+
+
+
 function resetcons_Callback(hObject, eventdata, handles)
 set(handles.price,'string',0);
 set(handles.rcost,'string',0);
@@ -109,48 +145,11 @@ set(handles.total,'string',20);
 
 
 function price_Callback(hObject, eventdata, handles)
-p1 = get(handles.price,'String');%get the string for the editText component
-p=str2num(p1);
-rc1 = get(handles.rcost,'String');
-rc=str2num(rc1);
-vp1 = get(handles.perf,'String');
-vp=str2num(vp1);
-r1 = get(handles.range,'String');
-r=str2num(r1);
-e1 = get(handles.emiss,'String');
-e=str2num(e1);
-rf1 = get(handles.refuel,'String');
-rf=str2num(rf1);
-t1=20-(p+rc+vp+r+e+rf);
-t=num2str(t1);
-
-
-if  (isempty(p) || p < 0 || p > 20);  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.price,'Value',0);
-    set(handles.price,'String','0');
-    mp=msgbox('Please insert a value between 0 to 20 for Purchase Price','Error Purchase Price');
-    set( mp, 'color', [ 0.9 0.9 .9 ] )
-else
-end
-
-if (t1<0)
-    set(handles.price,'string','0');
-    mp1=msgbox('You have exceeded your maximum allocated points','Error Allocated Points');
-    set( mp1, 'color', [ 0.9 0.9 .9 ] )
-    p1 = get(handles.price,'String');
-    p=str2num(p1);
-    t1=20-(p+rc+vp+r+e+rf);
-    t=num2str(t1);
-    set(handles.total,'string',t);
-elseif (t1==0||t1>0)
-    set(handles.total,'string',t);
-else
-end
+preferences(handles,1,'Error Purchase Price')
 guidata(hObject, handles)
 
 
 function price_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -160,47 +159,12 @@ end
 
 
 function rcost_Callback(hObject, eventdata, handles)
-p1 = get(handles.price,'String');%get the string for the editText component
-p=str2num(p1);
-rc1 = get(handles.rcost,'String');
-rc=str2num(rc1);
-vp1 = get(handles.perf,'String');
-vp=str2num(vp1);
-r1 = get(handles.range,'String');
-r=str2num(r1);
-e1 = get(handles.emiss,'String');
-e=str2num(e1);
-rf1 = get(handles.refuel,'String');
-rf=str2num(rf1);
-t1=20-(p+rc+vp+r+e+rf);
-t=num2str(t1);
-
-if  (isempty(rc)|| rc < 0 || rc > 20);  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.rcost,'Value',0);
-    set(handles.rcost,'String','0');
-    mrc=msgbox('Please insert a value between 0 to 20 for Running Cost','Error Running Cost');
-    set( mrc, 'color', [ 0.9 0.9 .9 ] );
-else
-end
-
-if (t1<0)
-    set(handles.rcost,'string','0');
-    mp1=msgbox('You have exceeded your maximum allocated points','Error Allocated Points');
-    set( mp1, 'color', [ 0.9 0.9 .9 ] )
-    rc1 = get(handles.rcost,'String');
-    rc=str2num(rc1);
-    t1=20-(p+rc+vp+r+e+rf);
-    t=num2str(t1);
-    set(handles.total,'string',t);
-elseif (t1==0||t1>0)
-    set(handles.total,'string',t);
-else
-end
+preferences(handles,2,'Error Running Cost')
 guidata(hObject, handles)
 
 
-function rcost_CreateFcn(hObject, eventdata, handles)
 
+function rcost_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -210,47 +174,11 @@ end
 
 
 function perf_Callback(hObject, eventdata, handles)
-p1 = get(handles.price,'String');%get the string for the editText component
-p=str2num(p1);
-rc1 = get(handles.rcost,'String');
-rc=str2num(rc1);
-vp1 = get(handles.perf,'String');
-vp=str2num(vp1);
-r1 = get(handles.range,'String');
-r=str2num(r1);
-e1 = get(handles.emiss,'String');
-e=str2num(e1);
-rf1 = get(handles.refuel,'String');
-rf=str2num(rf1);
-t1=20-(p+rc+vp+r+e+rf)
-t=num2str(t1)
-
-if (isempty(vp) || vp < 0 || vp > 20);  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.perf,'Value',0);
-    set(handles.perf,'String','0');
-    mvp=msgbox('Please insert a value between 0 to 20 for Vehicle Performance','Error Vehicle Performance');
-    set( mvp, 'color', [ 0.9 0.9 .9 ] )
-end
-
-if (t1<0)
-    set(handles.perf,'string','0');
-    mp1=msgbox('You have exceeded your maximum allocated points','Error Allocated Points');
-    set( mp1, 'color', [ 0.9 0.9 .9 ] )
-    vp1 = get(handles.perf,'String');
-    vp=str2num(vp1);
-    t1=20-(p+rc+vp+r+e+rf);
-    t=num2str(t1);
-    set(handles.total,'string',t);
-elseif (t1==0||t1>0)
-    set(handles.total,'string',t);
-else
-end
+preferences(handles,3,'Error Vehicle Performance')
 guidata(hObject, handles)
 
 
-
 function perf_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -258,49 +186,12 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-
 function range_Callback(hObject, eventdata, handles)
-p1 = get(handles.price,'String');%get the string for the editText component
-p=str2num(p1);
-rc1 = get(handles.rcost,'String');
-rc=str2num(rc1);
-vp1 = get(handles.perf,'String');
-vp=str2num(vp1);
-r1 = get(handles.range,'String');
-r=str2num(r1);
-e1 = get(handles.emiss,'String');
-e=str2num(e1);
-rf1 = get(handles.refuel,'String');
-rf=str2num(rf1);
-t1=20-(p+rc+vp+r+e+rf)
-t=num2str(t1)
-
-if (isempty(r)|| r < 0 || r > 20);  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.range,'Value',0);
-    set(handles.range,'String','0');
-    mr=msgbox('Please insert a value between 0 to 20 for Range','Error Range');
-    set( mr, 'color', [ 0.9 0.9 .9 ] )
-end
-
-if (t1<0)
-    set(handles.range,'string','0');
-    mp1=msgbox('You have exceeded your maximum allocated points','Error Allocated Points');
-    set( mp1, 'color', [ 0.9 0.9 .9 ] )
-    r1 = get(handles.range,'String');
-    r=str2num(r1);
-    t1=20-(p+rc+vp+r+e+rf);
-    t=num2str(t1);
-    set(handles.total,'string',t);
-elseif (t1==0||t1>0)
-    set(handles.total,'string',t);
-else
-end
+preferences(handles,4,'Error Range')
 guidata(hObject, handles)
 
 
-
 function range_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -310,46 +201,11 @@ end
 
 
 function emiss_Callback(hObject, eventdata, handles)
-p1 = get(handles.price,'String');%get the string for the editText component
-p=str2num(p1);
-rc1 = get(handles.rcost,'String');
-rc=str2num(rc1);
-vp1 = get(handles.perf,'String');
-vp=str2num(vp1);
-r1 = get(handles.range,'String');
-r=str2num(r1);
-e1 = get(handles.emiss,'String');
-e=str2num(e1);
-rf1 = get(handles.refuel,'String');
-rf=str2num(rf1);
-t1=20-(p+rc+vp+r+e+rf)
-t=num2str(t1)
+preferences(handles,5,'Error Emissions')
+guidata(hObject, handles)
 
-
-if (isempty(e)|| e < 0 || e > 20);  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.emiss,'Value',0);
-    set(handles.emiss,'String','0');
-    mr=msgbox('Please insert a value between 0 to 20 for Emissions','Error Emissions');
-    set( mr, 'color', [ 0.9 0.9 .9 ] )
-end
-
-if (t1<0)
-    set(handles.emiss,'string','0');
-    mp1=msgbox('You have exceeded your maximum allocated points','Error Allocated Points');
-    set( mp1, 'color', [ 0.9 0.9 .9 ] )
-    e1 = get(handles.emiss,'String');
-    e=str2num(e1);
-    t1=20-(p+rc+vp+r+e+rf);
-    t=num2str(t1);
-    set(handles.total,'string',t);
-elseif (t1==0||t1>0)
-    set(handles.total,'string',t);
-else
-end
-guidata(hObject, handles) 
 
 function emiss_CreateFcn(hObject, eventdata, handles)
-
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -358,337 +214,87 @@ end
 
 
 function refuel_Callback(hObject, eventdata, handles)
-p1 = get(handles.price,'String');%get the string for the editText component
-p=str2num(p1);
-rc1 = get(handles.rcost,'String');
-rc=str2num(rc1);
-vp1 = get(handles.perf,'String');
-vp=str2num(vp1);
-r1 = get(handles.range,'String');
-r=str2num(r1);
-e1 = get(handles.emiss,'String');
-e=str2num(e1);
-rf1 = get(handles.refuel,'String');
-rf=str2num(rf1);
-t1=20-(p+rc+vp+r+e+rf)
-t=num2str(t1)
-
-
-if (isempty(rf)|| rf < 0 || rf > 20);  %if user inputs something is not a number, or if the input is less than or greater than 100, then the slider value defaults to 0
-    set(handles.refuel,'Value',0);
-    set(handles.refuel,'String','0');
-    mr=msgbox('Please insert a value between 0 to 20 for Refuelling Availibility','Error Refuelling Availibility');
-    set( mr, 'color', [ 0.9 0.9 .9 ] )
-end
-
-if (t1<0)
-    set(handles.refuel,'string','0');
-    mp1=msgbox('You have exceeded your maximum allocated points','Error Allocated Points');
-    set( mp1, 'color', [ 0.9 0.9 .9 ] )
-    rf1 = get(handles.refuel,'String');
-    rf=str2num(rf1);
-    t1=20-(p+rc+vp+r+e+rf);
-    t=num2str(t1);
-    set(handles.total,'string',t);
-elseif (t1==0||t1>0)
-    set(handles.total,'string',t);
-else
-end
+preferences(handles,6,'Error Refuelling Availibility')
 guidata(hObject, handles)
 
-function refuel_CreateFcn(hObject, eventdata, handles)
 
+function refuel_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %policy controls
 
+function policy(handles,i)
+% i is an index relating to the check box.
 
+properties = [handles.sevsl, handles.sevvl, handles.sevyi, handles.sevyo,...
+    handles.text76;...
+    handles.hysl,handles.hyvl,handles.hyyi,handles.hyyo,...
+    handles.text77;...
+    handles.phsl,handles.phvl,handles.phyi,handles.phyo,...
+    handles.text78;...
+    handles.fcsl,handles.fcvl,handles.fcyi,handles.fcyo,...
+    handles.text79;...
+    handles.psl,handles.pvl,handles.pyi,handles.pyo,handles.text80;...
+    handles.dsl,handles.dvl,handles.dyi,handles.dyo,handles.text81;...
+    handles.esl,handles.evl,handles.eyi,handles.eyo,handles.text82;...
+    handles.hsl,handles.hvl,handles.hyi,handles.hyo,handles.text83];
+
+a=[get(handles.sev,'value'); get(handles.hy,'value');...
+    get(handles.ph,'value'); get(handles.fc,'value');...
+    get(handles.petrol,'value'); get(handles.diesel,'value');...
+    get(handles.electricity,'value'); get(handles.hydrogen,'value')];
+   
+if a(i)==1
+    for j = 1:5
+        set(properties(i,j),'visible','on');
+    end
+elseif a(i)==0
+    for j = 1:5
+        set(properties(i,j),'visible','off');
+    end
+end
+
+set(properties(i,1),'value',0);
+set(properties(i,2),'string','0');
+set(properties(i,3),'string','2010');
+set(properties(i,4),'string','2011');
+
+if sum(a) > 0
+    set(handles.yi,'visible','on')
+    set(handles.yo,'visible','on')
+else
+    set(handles.yi,'visible','off')
+    set(handles.yo,'visible','off')
+end
 
 function sev_Callback(hObject, eventdata, handles)
-a1=get(handles.sev,'value');
-a2=get(handles.hy,'value');
-a3=get(handles.ph,'value');
-a4=get(handles.fc,'value');
-a5=get(handles.petrol,'value');
-a6=get(handles.diesel,'value');
-a7=get(handles.electricity,'value');
-a8=get(handles.hydrogen,'value');
-if a1==1
-    set(handles.sevsl,'visible','on');
-    set(handles.sevvl,'visible','on');
-    set(handles.sevyi,'visible','on');
-    set(handles.sevyo,'visible','on');
-    set(handles.text76,'visible','on');
-elseif a1==0
-    set(handles.sevsl,'visible','off');
-    set(handles.sevvl,'visible','off');
-    set(handles.sevyi,'visible','off');
-    set(handles.sevyo,'visible','off');
-    set(handles.text76,'visible','off');
-    set(handles.sevsl,'value',0);
-    set(handles.sevvl,'string','0');
-    set(handles.sevyi,'string','2010');
-    set(handles.sevyo,'string','2011');
-    
-    
-end
+policy(handles,1)
 
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1||a8==1)
-    set(handles.yi,'visible','on')
-    set(handles.yo,'visible','on')
-else
-    set(handles.yi,'visible','off')
-    set(handles.yo,'visible','off')
-end
-    
-    
 function hy_Callback(hObject, eventdata, handles)
-a1=get(handles.sev,'value');
-a2=get(handles.hy,'value');
-a3=get(handles.ph,'value');
-a4=get(handles.fc,'value');
-a5=get(handles.petrol,'value');
-a6=get(handles.diesel,'value');
-a7=get(handles.electricity,'value');
-a8=get(handles.hydrogen,'value');
-if a2==1
-    set(handles.hysl,'visible','on');
-    set(handles.hyvl,'visible','on');
-    set(handles.hyyi,'visible','on');
-    set(handles.hyyo,'visible','on');
-    set(handles.text77,'visible','on');
-elseif a2==0
-    set(handles.hysl,'visible','off');
-    set(handles.hyvl,'visible','off');
-    set(handles.hyyi,'visible','off');
-    set(handles.hyyo,'visible','off');
-    set(handles.text77,'visible','off');
-    set(handles.hysl,'value',0);
-    set(handles.hyvl,'string','0');
-    set(handles.hyyi,'string','2010');
-    set(handles.hyyo,'string','2011');
-end
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1||a8==1)
-    set(handles.yi,'visible','on')
-    set(handles.yo,'visible','on')
-else
-    set(handles.yi,'visible','off')
-    set(handles.yo,'visible','off')
-end
+policy(handles,2)
 
 function ph_Callback(hObject, eventdata, handles)
-a1=get(handles.sev,'value');
-a2=get(handles.hy,'value');
-a3=get(handles.ph,'value');
-a4=get(handles.fc,'value');
-a5=get(handles.petrol,'value');
-a6=get(handles.diesel,'value');
-a7=get(handles.electricity,'value');
-a8=get(handles.hydrogen,'value');
-if a3==1
-    set(handles.phsl,'visible','on');
-    set(handles.phvl,'visible','on');
-    set(handles.phyi,'visible','on');
-    set(handles.phyo,'visible','on');
-    set(handles.text78,'visible','on');
-elseif a3==0
-    set(handles.phsl,'visible','off');
-    set(handles.phvl,'visible','off');
-    set(handles.phyi,'visible','off');
-    set(handles.phyo,'visible','off');
-    set(handles.text78,'visible','off');
-    set(handles.phsl,'value',0);
-    set(handles.phvl,'string','0');
-    set(handles.phyi,'string','2010');
-    set(handles.phyo,'string','2011');
-end
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1||a8==1)
-    set(handles.yi,'visible','on')
-    set(handles.yo,'visible','on')
-else
-    set(handles.yi,'visible','off')
-    set(handles.yo,'visible','off')
-end
+policy(handles,3)
 
 function fc_Callback(hObject, eventdata, handles)
-a1=get(handles.sev,'value');
-a2=get(handles.hy,'value');
-a3=get(handles.ph,'value');
-a4=get(handles.fc,'value');
-a5=get(handles.petrol,'value');
-a6=get(handles.diesel,'value');
-a7=get(handles.electricity,'value');
-a8=get(handles.hydrogen,'value');
-if a4==1
-    set(handles.fcsl,'visible','on');
-    set(handles.fcvl,'visible','on');
-    set(handles.fcyi,'visible','on');
-    set(handles.fcyo,'visible','on');
-    set(handles.text79,'visible','on');
-elseif a4==0
-    set(handles.fcsl,'visible','off');
-    set(handles.fcvl,'visible','off');
-    set(handles.fcyi,'visible','off');
-    set(handles.fcyo,'visible','off');
-    set(handles.text79,'visible','off');
-    set(handles.fcsl,'value',0);
-    set(handles.fcvl,'string','0');
-    set(handles.fcyi,'string','2010');
-    set(handles.fcyo,'string','2011');
-end
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1||a8==1)
-    set(handles.yi,'visible','on')
-    set(handles.yo,'visible','on')
-else
-    set(handles.yi,'visible','off')
-    set(handles.yo,'visible','off')
-end
+policy(handles,4)
 
 function petrol_Callback(hObject, eventdata, handles)
-a1=get(handles.sev,'value');
-a2=get(handles.hy,'value');
-a3=get(handles.ph,'value');
-a4=get(handles.fc,'value');
-a5=get(handles.petrol,'value');
-a6=get(handles.diesel,'value');
-a7=get(handles.electricity,'value');
-a8=get(handles.hydrogen,'value');
-if a5==1
-    set(handles.psl,'visible','on');
-    set(handles.pvl,'visible','on');
-    set(handles.pyi,'visible','on');
-    set(handles.pyo,'visible','on');
-    set(handles.text80,'visible','on');
-elseif a5==0
-    set(handles.psl,'visible','off');
-    set(handles.pvl,'visible','off');
-    set(handles.pyi,'visible','off');
-    set(handles.pyo,'visible','off');
-    set(handles.text80,'visible','off');
-    set(handles.psl,'value',0);
-    set(handles.pvl,'string','0');
-    set(handles.pyi,'string','2010');
-    set(handles.pyo,'string','2011');
-end
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1||a8==1)
-    set(handles.yi,'visible','on')
-    set(handles.yo,'visible','on')
-else
-    set(handles.yi,'visible','off')
-    set(handles.yo,'visible','off')
-end
+policy(handles,5)
 
 function diesel_Callback(hObject, eventdata, handles)
-a1=get(handles.sev,'value');
-a2=get(handles.hy,'value');
-a3=get(handles.ph,'value');
-a4=get(handles.fc,'value');
-a5=get(handles.petrol,'value');
-a6=get(handles.diesel,'value');
-a7=get(handles.electricity,'value');
-a8=get(handles.hydrogen,'value');
-if a6==1
-    set(handles.dsl,'visible','on');
-    set(handles.dvl,'visible','on');
-    set(handles.dyi,'visible','on');
-    set(handles.dyo,'visible','on');
-    set(handles.text81,'visible','on');
-elseif a6==0
-    set(handles.dsl,'visible','off');
-    set(handles.dvl,'visible','off');
-    set(handles.dyi,'visible','off');
-    set(handles.dyo,'visible','off');
-    set(handles.text81,'visible','off');
-    set(handles.dsl,'value',0);
-    set(handles.dvl,'string','0');
-    set(handles.dyi,'string','2010');
-    set(handles.dyo,'string','2011');
-end
-
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1||a8==1)
-    set(handles.yi,'visible','on')
-    set(handles.yo,'visible','on')
-else
-    set(handles.yi,'visible','off')
-    set(handles.yo,'visible','off')
-end
+policy(handles,6)
 
 function electricity_Callback(hObject, eventdata, handles)
-a1=get(handles.sev,'value');
-a2=get(handles.hy,'value');
-a3=get(handles.ph,'value');
-a4=get(handles.fc,'value');
-a5=get(handles.petrol,'value');
-a6=get(handles.diesel,'value');
-a7=get(handles.electricity,'value');
-a8=get(handles.hydrogen,'value');
-if a7==1
-    set(handles.esl,'visible','on');
-    set(handles.evl,'visible','on');
-    set(handles.eyi,'visible','on');
-    set(handles.eyo,'visible','on');
-    set(handles.text82,'visible','on');
-elseif a7==0
-    set(handles.esl,'visible','off');
-    set(handles.evl,'visible','off');
-    set(handles.eyi,'visible','off');
-    set(handles.eyo,'visible','off');
-    set(handles.text82,'visible','off');
-    set(handles.esl,'value',0);
-    set(handles.evl,'string','0');
-    set(handles.eyi,'string','2010');
-    set(handles.eyo,'string','2011');
-end
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1||a8==1)
-    set(handles.yi,'visible','on')
-    set(handles.yo,'visible','on')
-else
-    set(handles.yi,'visible','off')
-    set(handles.yo,'visible','off')
-end
+policy(handles,7)
 
 function hydrogen_Callback(hObject, eventdata, handles)
-a1=get(handles.sev,'value');
-a2=get(handles.hy,'value');
-a3=get(handles.ph,'value');
-a4=get(handles.fc,'value');
-a5=get(handles.petrol,'value');
-a6=get(handles.diesel,'value');
-a7=get(handles.electricity,'value');
-a8=get(handles.hydrogen,'value');
-if a8==1
-    set(handles.hsl,'visible','on');
-    set(handles.hvl,'visible','on');
-    set(handles.hyi,'visible','on');
-    set(handles.hyo,'visible','on');
-    set(handles.text83,'visible','on');
-elseif a8==0
-    set(handles.hsl,'visible','off');
-    set(handles.hvl,'visible','off');
-    set(handles.hyi,'visible','off');
-    set(handles.hyo,'visible','off');
-    set(handles.text83,'visible','off');
-    set(handles.hsl,'value',0);
-    set(handles.hvl,'string','0');
-    set(handles.hyi,'string','2010');
-    set(handles.hyo,'string','2011');
-end
-if (a1==1||a2==1||a3==1||a4==1||a5==1||a6==1||a7==1||a8==1)
-    set(handles.yi,'visible','on')
-    set(handles.yo,'visible','on')
-else
-    set(handles.yi,'visible','off')
-    set(handles.yo,'visible','off')
-end
-
+policy(handles,8)
 
 
 %slider, value, years for PAMD
@@ -709,7 +315,7 @@ end
 
 function sevvl_Callback(hObject, eventdata, handles)
 vl = get(handles.sevvl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -730,9 +336,9 @@ end
 
 function sevyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.sevyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.sevyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -756,11 +362,11 @@ end
 
 function sevyo_Callback(hObject, eventdata, handles)
 syi1 = get(handles.sevyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.sevyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -798,7 +404,7 @@ end
 
 function hyvl_Callback(hObject, eventdata, handles)
 vl = get(handles.hyvl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -819,9 +425,9 @@ end
 
 function hyyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.hyyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.hyyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -846,11 +452,11 @@ end
 
 function hyyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.hyyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.hyyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
    
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -890,7 +496,7 @@ end
 
 function phvl_Callback(hObject, eventdata, handles)
 vl = get(handles.phvl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -911,9 +517,9 @@ end
 
 function phyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.phyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.phyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -938,11 +544,11 @@ end
 
 function phyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.phyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.phyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 
 if(pyo<pyi)
@@ -982,7 +588,7 @@ end
 
 function fcvl_Callback(hObject, eventdata, handles)
 vl = get(handles.fcvl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -1003,9 +609,9 @@ end
 
 function fcyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.fcyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.fcyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1030,11 +636,11 @@ end
 
 function fcyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.fcyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.fcyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1075,7 +681,7 @@ end
 
 function pvl_Callback(hObject, eventdata, handles)
 vl = get(handles.pvl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -1096,9 +702,9 @@ end
 
 function pyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.pyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.pyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1122,11 +728,11 @@ end
 
 function pyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.pyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.pyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1163,7 +769,7 @@ end
 
 function dvl_Callback(hObject, eventdata, handles)
 vl = get(handles.dvl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -1184,9 +790,9 @@ end
 
 function dyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.dyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.dyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1210,11 +816,11 @@ end
 
 function dyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.dyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.dyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1251,7 +857,7 @@ end
 
 function evl_Callback(hObject, eventdata, handles)
 vl = get(handles.evl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -1272,9 +878,9 @@ end
 
 function eyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.eyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.eyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1298,11 +904,11 @@ end
 
 function eyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.eyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.eyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1340,7 +946,7 @@ end
 
 function hvl_Callback(hObject, eventdata, handles)
 vl = get(handles.hvl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 10000)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -1361,9 +967,9 @@ end
 
 function hyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.hyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.hyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1387,11 +993,11 @@ end
 
 function hyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.hyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.hyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1676,7 +1282,7 @@ end
 
 function ncegvl_Callback(hObject, eventdata, handles)
 vl = get(handles.ncegvl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -1697,9 +1303,9 @@ end
 
 function ncegyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.ncegyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.ncegyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1723,11 +1329,11 @@ end
 
 function ncegyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.ncegyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.ncegyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1830,7 +1436,7 @@ end
 
 function ptivl_Callback(hObject, eventdata, handles)
 vl = get(handles.ptivl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -1851,9 +1457,9 @@ end
 
 function ptiyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.ptiyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.ptiyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1877,11 +1483,11 @@ end
 
 function ptiyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.ptiyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.ptiyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1904,7 +1510,7 @@ end
 
 function dtivl_Callback(hObject, eventdata, handles)
 vl = get(handles.dtivl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -1925,9 +1531,9 @@ end
 
 function dtiyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.dtiyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.dtiyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1951,11 +1557,11 @@ end
 
 function dtiyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.dtiyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.dtiyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -1978,7 +1584,7 @@ end
 
 function htivl_Callback(hObject, eventdata, handles)
 vl = get(handles.htivl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -1999,9 +1605,9 @@ end
 
 function htiyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.htiyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.htiyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -2025,11 +1631,11 @@ end
 
 function htiyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.htiyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.htiyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -2052,7 +1658,7 @@ end
 
 function pihtivl_Callback(hObject, eventdata, handles)
 vl = get(handles.pihtivl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -2073,9 +1679,9 @@ end
 
 function pihtiyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.pihtiyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.pihtiyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -2099,11 +1705,11 @@ end
 
 function pihtiyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.pihtiyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.pihtiyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -2126,7 +1732,7 @@ end
 
 function etivl_Callback(hObject, eventdata, handles)
 vl = get(handles.etivl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -2147,9 +1753,9 @@ end
 
 function etiyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.etiyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.etiyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -2173,11 +1779,11 @@ end
 
 function etiyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.etiyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.etiyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -2200,7 +1806,7 @@ end
 
 function fctivl_Callback(hObject, eventdata, handles)
 vl = get(handles.fctivl,'String');%get the string for the editText component
-vl1 = str2num(vl);%convert from string to number if possible, otherwise returns empty
+vl1 = str2double(vl);%convert from string to number if possible, otherwise returns empty
 
 
 if (isempty(vl1) || vl1 < 0 || vl1 > 100)  %if user inputs something is not a number, or if the input is less than or greater than 10000, then the slider value defaults to 0
@@ -2221,9 +1827,9 @@ end
 
 function fctiyi_Callback(hObject, eventdata, handles)
 syi1 = get(handles.fctiyi,'string');
-syi = str2num(syi1);
+syi = str2double(syi1);
 syo1 = get(handles.fctiyo,'string');
-syo = str2num(syo1);
+syo = str2double(syo1);
 
 if(syo<syi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -2247,11 +1853,11 @@ end
 
 function fctiyo_Callback(hObject, eventdata, handles)
 pyi1 = get(handles.fctiyi,'string');
-pyi = str2num(pyi1);
+pyi = str2double(pyi1);
 pyo1 = get(handles.fctiyo,'string');
-pyo = str2num(pyo1);
+pyo = str2double(pyo1);
 cy1 = get(handles.finalyear,'string');
-cy = str2num(cy1);
+cy = str2double(cy1);
 
 if(pyo<pyi)
     my=msgbox('The policy year out cannot be smaller than the year in', 'Error Policy Year');
@@ -2300,126 +1906,126 @@ ICERT(1)=0
 %getting values of PAMD
 ss10=get(handles.sev,'value');
 ss1=get(handles.sevvl,'string');
-ss11=str2num(ss1);
+ss11=str2double(ss1);
 ss2=get(handles.sevyi,'string');
-ss12=str2num(ss2);
+ss12=str2double(ss2);
 ss3=get(handles.sevyo,'string');
-ss13=str2num(ss3);
+ss13=str2double(ss3);
 
 hy10=get(handles.hy,'value');
 hy1=get(handles.hyvl,'string');
-hy11=str2num(hy1);
+hy11=str2double(hy1);
 hy2=get(handles.hyyi,'string');
-hy12=str2num(hy2);
+hy12=str2double(hy2);
 hy3=get(handles.hyyo,'string');
-hy13=str2num(hy3);
+hy13=str2double(hy3);
 
 ph10=get(handles.ph,'value');
 ph1=get(handles.phvl,'string');
-ph11=str2num(ph1);
+ph11=str2double(ph1);
 ph2=get(handles.phyi,'string');
-ph12=str2num(ph2);
+ph12=str2double(ph2);
 ph3=get(handles.phyo,'string');
-ph13=str2num(ph3);
+ph13=str2double(ph3);
 
 fc10=get(handles.fc,'value');
 fc1=get(handles.fcvl,'string');
-fc11=str2num(fc1);
+fc11=str2double(fc1);
 fc2=get(handles.fcyi,'string');
-fc12=str2num(fc2);
+fc12=str2double(fc2);
 fc3=get(handles.fcyo,'string');
-fc13=str2num(fc3);
+fc13=str2double(fc3);
 
 pp10=get(handles.petrol,'value');
 pp1=get(handles.pvl,'string');
-pp11=str2num(pp1);
+pp11=str2double(pp1);
 pp2=get(handles.pyi,'string');
-pp12=str2num(pp2);
+pp12=str2double(pp2);
 pp3=get(handles.pyo,'string');
-pp13=str2num(pp3);
+pp13=str2double(pp3);
 
 dp10=get(handles.diesel,'value');
 dp1=get(handles.dvl,'string');
-dp11=str2num(dp1);
+dp11=str2double(dp1);
 dp2=get(handles.dyi,'string');
-dp12=str2num(dp2);
+dp12=str2double(dp2);
 dp3=get(handles.dyo,'string');
-dp13=str2num(dp3);
+dp13=str2double(dp3);
 
 ep10=get(handles.electricity,'value');
 ep1=get(handles.evl,'string');
-ep11=str2num(ep1);
+ep11=str2double(ep1);
 ep2=get(handles.eyi,'string');
-ep12=str2num(ep2);
+ep12=str2double(ep2);
 ep3=get(handles.eyo,'string');
-ep13=str2num(ep3);
+ep13=str2double(ep3);
 
 hp10=get(handles.hydrogen,'value');
 hp1=get(handles.hvl,'string');
-hp11=str2num(hp1);
+hp11=str2double(hp1);
 hp2=get(handles.hyi,'string');
-hp12=str2num(hp2);
+hp12=str2double(hp2);
 hp3=get(handles.hyo,'string');
-hp13=str2num(hp3);
+hp13=str2double(hp3);
 
     
 %getting values of OFAMD
 
 ec010=get(handles.nceg,'value');
 ec01=get(handles.ncegvl,'string');
-ec011=str2num(ec01);
+ec011=str2double(ec01);
 ec02=get(handles.ncegyi,'string');
-ec012=str2num(ec02);
+ec012=str2double(ec02);
 ec03=get(handles.ncegyo,'string');
-ec013=str2num(ec03);
+ec013=str2double(ec03);
 
 pp010=get(handles.pti,'value');
 pp01=get(handles.ptivl,'string');
-pp011=str2num(pp01);
+pp011=str2double(pp01);
 pp02=get(handles.ptiyi,'string');
-pp012=str2num(pp02);
+pp012=str2double(pp02);
 pp03=get(handles.ptiyo,'string');
-pp013=str2num(pp03);
+pp013=str2double(pp03);
 
 dp010=get(handles.dti,'value');
 dp01=get(handles.dtivl,'string');
-dp011=str2num(dp01);
+dp011=str2double(dp01);
 dp02=get(handles.dtiyi,'string');
-dp012=str2num(dp02);
+dp012=str2double(dp02);
 dp03=get(handles.dtiyo,'string');
-dp013=str2num(dp03);
+dp013=str2double(dp03);
 
 hp010=get(handles.hti,'value');
 hp01=get(handles.htivl,'string');
-hp011=str2num(hp01);
+hp011=str2double(hp01);
 hp02=get(handles.htiyi,'string');
-hp012=str2num(hp02);
+hp012=str2double(hp02);
 hp03=get(handles.htiyo,'string');
-hp013=str2num(hp03);
+hp013=str2double(hp03);
 
 pi010=get(handles.pihti,'value');
 pi01=get(handles.pihtivl,'string');
-pi011=str2num(pi01);
+pi011=str2double(pi01);
 pi02=get(handles.pihtiyi,'string');
-pi012=str2num(pi02);
+pi012=str2double(pi02);
 pi03=get(handles.pihtiyo,'string');
-pi013=str2num(pi03);
+pi013=str2double(pi03);
 
 et010=get(handles.eti,'value');
 et01=get(handles.etivl,'string');
-et011=str2num(et01);
+et011=str2double(et01);
 et02=get(handles.etiyi,'string');
-et012=str2num(et02);
+et012=str2double(et02);
 et03=get(handles.etiyo,'string');
-et013=str2num(et03);
+et013=str2double(et03);
 
 fc010=get(handles.fcti,'value');
 fc01=get(handles.fctivl,'string');
-fc011=str2num(fc01);
+fc011=str2double(fc01);
 fc02=get(handles.fctiyi,'string');
-fc012=str2num(fc02);
+fc012=str2double(fc02);
 fc03=get(handles.fctiyo,'string');
-fc013=str2num(fc03);
+fc013=str2double(fc03);
 
 
 
@@ -2427,20 +2033,20 @@ fc013=str2num(fc03);
 %set CC
 
 p1 = get(handles.price,'String');
-p=str2num(p1);
+p=str2double(p1);
 rc1 = get(handles.rcost,'String');
-rc=str2num(rc1);
+rc=str2double(rc1);
 vp1 = get(handles.perf,'String');
-vp=str2num(vp1);
+vp=str2double(vp1);
 r1 = get(handles.range,'String');
-r=str2num(r1);
+r=str2double(r1);
 e1 = get(handles.emiss,'String');
-e=str2num(e1);
+e=str2double(e1);
 rf1 = get(handles.refuel,'String');
-rf=str2num(rf1);
+rf=str2double(rf1);
 t1=20-(p+rc+vp+r+e+rf);
 y1 = get(handles.finalyear,'string');
-y=str2num(y1);
+y=str2double(y1);
 
  
 %%%%%%%%%%%%%%%%%
