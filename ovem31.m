@@ -1,6 +1,6 @@
 function [pp,fc,per,fnc,ce,ra,fc_wtw,ce_wtw,med_batt_cap,mj_km] = ovem31
 
-% Where are these numbers from?
+% THESE NUMBERS MIGHT NEED UPDATING!
 batt_cost_kwh=1000;
 fuel_cost_petrol=1.076;
 fuel_cost_diesel=1.166;

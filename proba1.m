@@ -796,7 +796,6 @@ others(handles,7)
 
 %sliders, values, years for OFAMD
 
-
 function ncegsl_Callback(hObject, eventdata, handles)
 sl = get(handles.ncegsl,'Value');%obtains the slider value from the slider component
 set(handles.ncegvl,'String', num2str(sl));%puts the slider value into the edit text component

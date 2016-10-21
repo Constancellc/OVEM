@@ -25,19 +25,11 @@ tvs_growth_rate = 1.012; %where gr is the user-defined TVS growth rate
 TVS_GR = tvs_growth_rate;
 invest_mat = zeros(years,6);
 
-
 %% Load engine maps
 di_map = single(xlsread('die_map.xls'));
 si_turbo_map = single(xlsread('si_turbo_map.xls'));
 si_map = single(xlsread('si_map.xls'));
 ele_map = single(xlsread('ele_map.xls'));
-
-%   di_map = xlsread('/Users/robert_camilleri/Dropbox/OVEM plus/OVEM+ 2/die_map.xls');
-%   si_turbo_map = xlsread('/Users/robert_camilleri/Dropbox/OVEM plus/OVEM+ 2/si_turbo_map.xls');
-%   si_map = xlsread('/Users/robert_camilleri/Dropbox/OVEM plus/OVEM+ 2/si_map.xls');
-%   ele_map = single(xlsread('/Users/robert_camilleri/Dropbox/OVEM plus/OVEM+ 2/ele_map'));
-
-
 
 max_di_eff = max(max(di_map));
 max_ele_eff = max(max(ele_map));

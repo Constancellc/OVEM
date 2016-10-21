@@ -136,29 +136,15 @@ proba1
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %notes
-%need to have a way of not going on other windows unless through cancel
-%buttons.  check what you did with ice
-
 % check how to rsume uce, electric and hybrid, similar to what you did on
 % vmod
 
-% check if proba1 works same as vmod
-
-
-%correct back from vmod
 %blank the first part of para.  put an not available note and allow only
 %the 2nd part of it
+
 %policy intervention values not showing and year for pi
-
-
 
 %policy intervention year should be taken from consumer
 
 %consumer, set B in icert before the ovem loop as B_pp etc
-
-%need to change para1: 
-%1) when a figure is already plotted and you try to change the y axis, you
-%need to press plot to have a new chart.  maybe you can avoid that
-%2) changes in plot WTW-TTW can be changed to WTT
-%3) check what happens when no WTW and no TTW are pressed
 
