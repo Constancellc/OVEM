@@ -52,13 +52,8 @@ function para1_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to para1 (see VARARGIN)
 
-
-
 % Choose default command line output for para1
 handles.output = hObject;
-
-
-
 
 % Update handles structure
 guidata(hObject, handles);

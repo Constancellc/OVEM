@@ -1,4 +1,8 @@
 function varargout = electric(varargin)
+
+% I'M CONFUSED ABOUT MOTOR EFFICIENY, DON'T WE FIND IT FROM THE EFFICIENCY
+% MAP? PLUS I CAN'T FIND FIGURES ONLINE --> THERE ISN'T ONE VALUE?
+
 % ELECTRIC MATLAB code for electric.fig
 %      ELECTRIC, by itself, creates a novice ELECTRIC or raises the existing
 %      singleton*.
@@ -22,7 +26,7 @@ function varargout = electric(varargin)
 
 % Edit the above text to modify the response to help electric
 
-% Last Modified by GUIDE v2.5 02-Dec-2011 14:42:01
+% Last Modified by GUIDE v2.5 21-Oct-2016 16:20:05
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 0;
@@ -99,9 +103,11 @@ INDEX
 6: motor power
 7: range
 8: regen. efficiency
+9: motor torque
+10: motor efficiency
 %}
-lower = [0,0,0,14,0,0,0,0];
-higher = [0.4,3,Inf,17,0.02,1000,Inf,100];
+lower = [0,0,0,14,0,0,0,0,0,0];
+higher = [0.4,3,Inf,17,0.02,1000,Inf,100,Inf,100];
 guidata(hObject, handles);
 
 
@@ -324,6 +330,43 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+function mtorque_Callback(hObject, eventdata, handles)
+generic(handles.mtorque,9,'motor torque');
+
+
+% --- Executes during object creation, after setting all properties.
+function mtorque_CreateFcn(hObject, eventdata, handles)
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+% hObject    handle to mtorque (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+function meffy_Callback(hObject, eventdata, handles)
+generic(handles.meffy,10,'motor efficiency');
+ 
+
+% --- Executes during object creation, after setting all properties.
+function meffy_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to meffy (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %motor controls
 
@@ -356,6 +399,7 @@ madv=msgbox('Sorry, the advanced feature is still inactive','advanced');
 
 function range_Callback(hObject, eventdata, handles)
 generic(handles.range,7,'range');
+guidata(hObject, handles);
 
 function range_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
@@ -547,3 +591,5 @@ T=[0 0 0 0 0 0];
 VR=[0 0];
 SET=[0];
 close();
+
+

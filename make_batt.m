@@ -1,6 +1,7 @@
 function [batt_kwh,NoCells_ESS1,NoCells_ESS2,NoCells_ESS1_par,NoCells_ESS1_ser] ...
     = make_batt(ESS1_selection,~,batt_V,batt_cap)
 
+% WARNING: I DON'T HAVE MANY OF THE FILES CALLED BELOW
 
 %% Select battery to use
 if ESS1_selection==1      %AltairNano, 50 Ah
@@ -33,8 +34,9 @@ elseif ESS1_selection==9
 elseif ESS1_selection==10
     batt_specs_3_greensaver_sp_36_12;
 
-else 
-    batt_specs_3_bostonpower_swing4400;
+else
+    batt_specs_3_AESC;
+    %batt_specs_3_bostonpower_swing4400;
   
 end
 %% Series pack
@@ -54,7 +56,7 @@ ser_cells = round(batt_V/Eo);
 string_kwh = ser_cells * Eo * Q/1000;
 par_cells = single((batt_cap/3.6)/string_kwh);%max([1 round((batt_cap/3.6)/string_kwh)]);
 
-NoCells_ESS1 = round(par_cells * ser_cells);
+NoCells_ESS1 = 192;%round(par_cells * ser_cells);
 NoCells_ESS1_par = par_cells;
 NoCells_ESS1_ser = ser_cells;
 NoCells_ESS2 = 0;

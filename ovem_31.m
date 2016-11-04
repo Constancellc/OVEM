@@ -1,12 +1,19 @@
 function ovem_31%(batt_cost_kwh,fuel_cost_petrol,fuel_cost_diesel,fuel_cost_kwh,di_map,si_turbo_map,si_map,~,...
     %v_req,t,slope,distance_req,distance_req_alt,timestep,drive_cycle_length,elec_co2_per_kwh,elec_mj_per_kwh)
  
+%{
 batt_cost_kwh=1000;
 fuel_cost_petrol=1.076;
 fuel_cost_diesel=1.166;
 fuel_cost_kwh=0.09;
+%}
+batt_cost_kwh=119;
+fuel_cost_petrol=1.156;
+fuel_cost_diesel=1.174;
+fuel_cost_kwh=0.01;
 elec_co2_per_kwh=497;
-elec_mj_per_kwh=0.25;
+elec_mj_per_kwh=0.25*.36;
+
  
 di_map = single(xlsread('die_map.xls'));
 si_turbo_map = single(xlsread('si_turbo_map.xls'));

@@ -13,12 +13,14 @@ function [max_motor_kw,fuel_motor,motor_eff_f,timestep,v_ach,vgb_mass,batt_kwh,D
     %Distance Achieved Scalar Initialization
     distance_ach=0;
 
+    component_efficiency_3;
+%{
 wheelaxle_efficiency=1;
 %Gearbox Parameters
 k_seal=0.00103;
 k_mesh=0.02;
 k_bearing=0.005;
-
+%}
 %% Motor Characterization
 %motor_selection=7;% = UQM motor %input('Select the motor that you want to be used: ');
 [total_motor_mass,number_of_motors]=motor_mass_calculator(motor_selection,motor_in_or_out_of_wheel,...
@@ -33,9 +35,14 @@ else
 end
 
 %% Make battery pack
+batt_specs_AESC;
+NoCells_ESS2 = 0;
+
+
+%{
 [batt_kwh,NoCells_ESS1,NoCells_ESS2,NoCells_ESS1_par,ser_cells] ...
     = make_batt(ESS1_selection,ESS2_selection,batt_V,batt_cap);
-
+%}
 %%
 % simulate = 1;
 % gear_ratio_vector = 1;

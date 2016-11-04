@@ -10,7 +10,7 @@ gb_mass = 0.49 * peak_ice_T^0.58 * top_gear_number^0.29;  %Taken from P 52, Auto
 veh_mass = veh_mass + (gb_mass + max_P*(1/ice_sp))*(1+overall_mass_fac);
 final_veh_mass = veh_mass;
 
-%% Find most efficient engine point
+%% Find most efficient and least engine point
 max_di_ice_2_eff = max(max(di_map));
 min_di_ice_2_eff = single(min(min(di_map))/100);
 
@@ -20,6 +20,7 @@ t_range = r/100*peak_ice_T;
 
 %%
 component_efficiency_3;
+
 if simulate ==1;
 gears = find_gear_ratio(simulate,final_drive_ratio,top_gear_ratio,...
     top_gear_number,peak_ice_w,w_range);
